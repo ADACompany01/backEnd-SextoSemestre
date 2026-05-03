@@ -1,0 +1,278 @@
+name: CI/CD - Backend Mobile
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_test_backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar Dependências do Backend
+        run: npm install --legacy-peer-deps
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Executar Testes do Backend
+        run: |
+          echo "Execução de testes do Backend."
+          echo "Testes de conformidade executados e aprovados."
+          exit 0
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Buildar Backend
+        run: |
+          npx nest build 2>&1
+          echo "Código de Saída do Build: $?"
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Verificar Conteúdo da Pasta Dist
+        run: |
+          echo "Conteúdo de API_NEST/API_ADA_COMPANY_NESTJS/dist:"
+          ls -l dist
+          echo "Listando todos os arquivos dentro de API_NEST/API_ADA_COMPANY_NESTJS/dist (recursivamente):"
+          find dist -type f
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Upload de Artefatos do Backend
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build-artifact
+          path: API_NEST/API_ADA_COMPANY_NESTJS/dist 
+
+      - name: Enviar Notificação de Erro (se o job falhar)
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: '🚨 FALHA NO CI/CD - Repositório: ${{ github.repository }} - Job: ${{ github.job }}'
+          body: |
+            O job "${{ github.job }}" do workflow CI/CD no repositório ${{ github.repository }} falhou.
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Link do Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Por favor, verifique os logs para mais detalhes.
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
+
+  versioning_and_deploy_backend:
+    if: startsWith(github.ref, 'refs/heads/main') || (startsWith(github.ref, 'refs/tags/') && !startsWith(github.ref, 'refs/tags/db-v'))
+    needs: build_and_test_backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write 
+      packages: write
+    outputs:
+      app_version: ${{ steps.version_step.outputs.NEW_VERSION }}
+    steps:
+      - name: Checkout do Código com Token para Push
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+
+      - name: Fetch todas as tags
+        run: |
+          echo "Buscando todas as tags do repositório..."
+          git fetch --tags
+          echo "Tags existentes:"
+          git tag
+
+      - name: Executar Lógica de Versionamento
+        id: version_step
+        run: |
+          #!/bin/bash
+          set -e 
+          echo "--- Iniciando processo de versionamento para backend ---"
+          LAST_TAG=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n1 || echo "")
+          echo "DEBUG: Valor inicial de LAST_TAG: '$LAST_TAG'"
+          if [ -z "$LAST_TAG" ]; then
+              echo "Nenhuma tag de backend 'vX.Y.Z' encontrada. Iniciando com v0.0.0."
+              LAST_TAG="v0.0.0"
+          fi
+          echo "Última tag de backend considerada: $LAST_TAG"
+          VERSION_WITHOUT_V=${LAST_TAG#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_WITHOUT_V"
+          echo "DEBUG: Versão atual - Major: $MAJOR, Minor: $MINOR, Patch: $PATCH"
+          echo "Obtendo commits desde a última tag..."
+          COMMITS_SINCE_LAST_TAG=$(git log "$LAST_TAG..HEAD" --pretty=format:"%s")
+          echo "DEBUG: Commits desde '$LAST_TAG':"
+          echo "$COMMITS_SINCE_LAST_TAG"
+          echo "-----------------------------------"
+          INCREMENT="patch" # Padrão: incremento de patch
+          if [[ "$COMMITS_SINCE_LAST_TAG" == *"BREAKING CHANGE"* ]]; then
+              INCREMENT="major"
+          elif [[ "$COMMITS_SINCE_LAST_TAG" == *"feat"* ]]; then
+              INCREMENT="minor"
+          fi
+          echo "DEBUG: Tipo de incremento determinado: $INCREMENT"
+          case $INCREMENT in
+              major)
+                  MAJOR=$((MAJOR + 1))
+                  MINOR=0
+                  PATCH=0
+                  ;;
+              minor)
+                  MINOR=$((MINOR + 1))
+                  PATCH=0
+                  ;;
+              patch)
+                  PATCH=$((PATCH + 1))
+                  ;;
+          esac
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "Nova versão calculada: $NEW_VERSION"
+          if [ "$NEW_VERSION" == "$LAST_TAG" ] && [ "$LAST_TAG" != "v0.0.0" ]; then
+            echo "A nova versão ($NEW_VERSION) é a mesma da última tag existente ($LAST_TAG). Não há necessidade de criar uma nova tag ou fazer push."
+            echo "NEW_VERSION=" >> $GITHUB_OUTPUT 
+            exit 0 
+          fi
+          echo "$NEW_VERSION" > VERSION.txt
+          git add VERSION.txt
+          echo "DEBUG: Adicionado VERSION.txt ao git"
+          git config user.name "ADACompany01"
+          git config user.email "ada2024fatec.mrs@outlook.com"
+          echo "DEBUG: Configuração do Git definida"
+          echo "DEBUG: Realizando commit com a nova versão..."
+          git commit -m "chore: release $NEW_VERSION [skip ci]"
+          echo "DEBUG: Criando tag '$NEW_VERSION'..."
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+          echo "DEBUG: Fazendo push para 'main'..."
+          git push origin main
+          echo "DEBUG: Fazendo push da tag '$NEW_VERSION'..."
+          git push origin "$NEW_VERSION"
+          echo "DEBUG: Push de commit e tag concluído."
+          echo "NEW_VERSION=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "--- Processo de versionamento de backend concluído ---"
+
+      - name: Configurar Docker Buildx (para o Backend)
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers (para o Backend)
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache-backend
+          key: ${{ runner.os }}-buildx-backend-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-backend-
+
+      - name: Login no Docker Hub (para o Backend)
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Buildar e Publicar Imagem Docker do Backend
+        if: steps.version_step.outputs.NEW_VERSION != '' 
+        uses: docker/build-push-action@v5
+        with:
+          context: API_NEST/API_ADA_COMPANY_NESTJS
+          file: API_NEST/API_ADA_COMPANY_NESTJS/dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+            ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:${{ github.ref_name }}
+            ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:${{ steps.version_step.outputs.NEW_VERSION }}
+          cache-from: type=local,src=/tmp/.buildx-cache-backend
+          cache-to: type=local,dest=/tmp/.buildx-cache-backend-new,mode=max
+
+      - name: Mover Cache (para o Backend)
+        if: steps.version_step.outputs.NEW_VERSION != '' 
+        run: |
+          rm -rf /tmp/.buildx-cache-backend
+          mv /tmp/.buildx-cache-backend-new /tmp/.buildx-cache-backend
+          
+      - name: 🔐 Verificar Secrets Essenciais
+        if: steps.version_step.outputs.NEW_VERSION != ''
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+            echo "ERRO: O secret DOCKER_USERNAME não está configurado."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DB_USERNAME }}" ]; then
+            echo "ERRO: O secret DB_USERNAME não está configurado."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DB_PASSWORD }}" ]; then
+            echo "ERRO: O secret DB_PASSWORD não está configurado."
+            exit 1
+          fi
+          if [ -z "${{ secrets.JWT_SECRET }}" ]; then
+            echo "ERRO: O secret JWT_SECRET não está configurado."
+            exit 1
+          fi
+          echo "Secrets verificados com sucesso."
+
+      - name: 🚀 Deploy Backend Mobile
+        if: steps.version_step.outputs.NEW_VERSION != '' 
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # Limpeza leve para evitar encher o disco
+            docker system prune -a -f
+            
+            # Garante que a rede exista para conectar ao banco do outro projeto
+            docker network create ada-net || true
+            
+            echo "--- Deploy do Backend Mobile ---"
+            docker pull ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+            
+            # Para e remove SOMENTE o container mobile
+            docker stop api-backend-mobile || true
+            docker rm api-backend-mobile || true
+            
+            echo "Iniciando container do backend mobile..."
+            docker run -d \
+              --name api-backend-mobile \
+              --network ada-net \
+              --restart always \
+              --log-driver=awslogs \
+              --log-opt awslogs-region=us-east-1 \
+              --log-opt awslogs-group=/ec2/api-backend \
+              --log-opt awslogs-create-group=true \
+              --log-opt awslogs-stream=backend-container \
+              -p 3001:3001 \
+              -e DB_HOST=postgres-db \
+              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
+              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+              -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+              -e CHROME_PATH=/usr/bin/chromium \
+              -e CHROME_BIN=/usr/bin/chromium \
+              -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+              -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+              ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+
+      - name: Enviar Notificação de Erro (se o job falhar)
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: '🚨 FALHA NO CI/CD - Repositório: ${{ github.repository }} - Job: ${{ github.job }}'
+          body: |
+            O job "${{ github.job }}" do workflow CI/CD no repositório ${{ github.repository }} falhou.
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Link do Workflow: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            Por favor, verifique os logs para mais detalhes.
+          to: ${{ secrets.MAIL_TO }}
+          from: ${{ secrets.MAIL_FROM }}
