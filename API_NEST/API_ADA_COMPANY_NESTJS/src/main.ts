@@ -15,7 +15,9 @@ async function bootstrap() {
 
   // Configuração segura do CORS - IMPORTANTE: configurar ANTES do Helmet
   const allowedOrigins = [
+    'http://localhost:3001',
     'http://localhost:3000',
+    'http://localhost:5173',
     'http://localhost:8081',
     'https://newadacompany.vercel.app',
     'https://adacompany.duckdns.org',
@@ -26,6 +28,7 @@ async function bootstrap() {
   if (isDevelopment) {
     allowedOrigins.push(
       'http://192.168.1.7:3000',
+      'http://192.168.1.7:3001',
       'http://192.168.1.7:8081',
       'http://192.168.50.58:3000',
       'http://192.168.50.58:8081',
@@ -103,12 +106,14 @@ async function bootstrap() {
   // Configuração do Swagger - apenas em ambiente de desenvolvimento
   // IMPORTANTE: O Swagger deve ser configurado DEPOIS do setGlobalPrefix para incluir o prefixo
   if (isDevelopment) {
+    const localServerUrl = `http://localhost:${port}/api`;
+
     const config = new DocumentBuilder()
       .setTitle('API ADA Company - Mobile Backend')
       .setDescription('API para gerenciamento de serviços da ADA Company (Backend Mobile - Porta 3001)\n\n**IMPORTANTE:** Todas as rotas têm o prefixo `/api`. Exemplo: `/api/funcionarios`')
       .setVersion('1.0')
+      .addServer(localServerUrl, 'Local')
       .addServer('https://adacompany.duckdns.org/api', 'Produção')
-      .addServer('http://localhost:3001/api', 'Local')
       .addTag('auth', 'Endpoints de autenticação')
       .addTag('clientes', 'Gerenciamento de clientes')
       .addTag('funcionarios', 'Gerenciamento de funcionários')
