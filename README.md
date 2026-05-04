@@ -35,7 +35,7 @@
 
 ## ✨ Sobre o Projeto
 
-Sistema completo para gestão de serviços, clientes e funcionários, com interface web moderna e API robusta. O sistema foi desenvolvido como projeto final do quinto semestre, utilizando arquitetura em camadas, containers Docker e API RESTful documentada.
+Sistema completo para gestão de serviços, clientes e funcionários, com interface web moderna e API robusta. O sistema foi desenvolvido como projeto final do sexto semestre, utilizando arquitetura em camadas, containers Docker e API RESTful documentada.
 
 ---
 
@@ -134,20 +134,20 @@ Sistema completo para gestão de serviços, clientes e funcionários, com interf
 
 ## 🗃️ Organização dos Repositórios
 
-- [Repositório Backend](https://github.com/ADACompany01/backEnd-QuintoSemestre)
-- [Repositório Frontend](https://github.com/ADACompany01/frontEnd-QuintoSemestre)
+- [Repositório Backend](https://github.com/ADACompany01/backEnd-SextoSemestre)
+- [Repositório Frontend](https://github.com/ADACompany01/frontEnd-SextoSemestre)
 
 Estrutura de pastas principal:
 
 ```
 Projetos/
-├── backEnd-QuintoSemestre/
+├── backEnd-SextoSemestre/
 │   └── API_NEST/
 │       └── API_ADA_COMPANY_NESTJS/
 │           ├── docker-compose.yml
 │           ├── dockerfile
 │           └── src/
-└── frontEnd-QuintoSemestre/
+└── frontEnd-SextoSemestre/
     ├── components/
     ├── controllers/
     ├── models/
@@ -163,12 +163,12 @@ Para rodar o sistema completo localmente (frontend, backend e banco de dados), b
 
 1. **Clone os repositórios:**
    ```sh
-   git clone https://github.com/ADACompany01/backEnd-QuintoSemestre.git
-   git clone https://github.com/ADACompany01/frontEnd-QuintoSemestre.git
+   git clone https://github.com/ADACompany01/backEnd-SextoSemestre.git
+   git clone https://github.com/ADACompany01/frontEnd-SextoSemestre.git
    ```
 2. **Navegue até a pasta do docker-compose:**
    ```sh
-   cd backEnd-QuintoSemestre/API_NEST/API_ADA_COMPANY_NESTJS
+   cd backEnd-SextoSemestre/API_NEST/API_ADA_COMPANY_NESTJS
    ```
 3. **Suba todos os containers:**
    ```sh
@@ -188,7 +188,7 @@ Para rodar o sistema completo localmente (frontend, backend e banco de dados), b
 Os testes do backend devem ser executados dentro da pasta da API NestJS:
 
 ```bash
-cd backEnd-QuintoSemestre/API_NEST/API_ADA_COMPANY_NESTJS
+cd backEnd-SextoSemestre/API_NEST/API_ADA_COMPANY_NESTJS
 ```
 
 ### Testes unitarios
