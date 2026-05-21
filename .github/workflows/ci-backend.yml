@@ -22,12 +22,23 @@ jobs:
         run: npm install --legacy-peer-deps
         working-directory: API_NEST/API_ADA_COMPANY_NESTJS
 
-      - name: Executar Testes do Backend
-        run: |
-          echo "Execução de testes do Backend."
-          echo "Testes de conformidade executados e aprovados."
-          exit 0
+      - name: Verificar ESLint do Backend
+        run: npm run lint:check
         working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Executar Testes Unitarios do Backend
+        run: npm test -- --runInBand
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Executar Testes com Cobertura do Backend
+        run: npm run test:cov -- --runInBand
+        working-directory: API_NEST/API_ADA_COMPANY_NESTJS
+
+      - name: Upload da Cobertura do Backend
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-artifact
+          path: API_NEST/coverage
 
       - name: Buildar Backend
         run: |
