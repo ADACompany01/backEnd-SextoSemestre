@@ -12,4 +12,4 @@ export class CreateOrcamentoDto {
 
   @IsUUID()
   id_pacote: string;
-} 
+}

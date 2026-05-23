@@ -3,7 +3,10 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Solicitacao } from '../infrastructure/database/entities/solicitacao.entity';
 import { Cliente } from '../infrastructure/database/entities/cliente.entity';
 import { SolicitacaoController } from '../interfaces/http/controllers/solicitacao.controller';
-import { SolicitacaoRepositoryProvider, SOLICITACAO_REPOSITORY } from '../infrastructure/providers/solicitacao.provider';
+import {
+  SolicitacaoRepositoryProvider,
+  SOLICITACAO_REPOSITORY,
+} from '../infrastructure/providers/solicitacao.provider';
 import { CreateSolicitacaoUseCase } from '../application/use-cases/solicitacao/create-solicitacao.use-case';
 import { ListSolicitacoesUseCase } from '../application/use-cases/solicitacao/list-solicitacoes.use-case';
 import { GetSolicitacaoUseCase } from '../application/use-cases/solicitacao/get-solicitacao.use-case';
@@ -35,7 +38,8 @@ import { PACOTE_REPOSITORY } from '../infrastructure/providers/pacote.provider';
     SolicitacaoRepositoryProvider,
     {
       provide: CreateSolicitacaoUseCase,
-      useFactory: (solicitacaoRepo, clienteRepo) => new CreateSolicitacaoUseCase(solicitacaoRepo, clienteRepo),
+      useFactory: (solicitacaoRepo, clienteRepo) =>
+        new CreateSolicitacaoUseCase(solicitacaoRepo, clienteRepo),
       inject: [SOLICITACAO_REPOSITORY, CLIENTE_REPOSITORY],
     },
     {
@@ -60,9 +64,24 @@ import { PACOTE_REPOSITORY } from '../infrastructure/providers/pacote.provider';
     },
     {
       provide: CreateOrcamentoFromSolicitacaoUseCase,
-      useFactory: (solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase, pacoteRepo) => 
-        new CreateOrcamentoFromSolicitacaoUseCase(solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase, pacoteRepo),
-      inject: [SOLICITACAO_REPOSITORY, CreatePacoteUseCase, CreateOrcamentoUseCase, PACOTE_REPOSITORY],
+      useFactory: (
+        solicitacaoRepo,
+        createPacoteUseCase,
+        createOrcamentoUseCase,
+        pacoteRepo,
+      ) =>
+        new CreateOrcamentoFromSolicitacaoUseCase(
+          solicitacaoRepo,
+          createPacoteUseCase,
+          createOrcamentoUseCase,
+          pacoteRepo,
+        ),
+      inject: [
+        SOLICITACAO_REPOSITORY,
+        CreatePacoteUseCase,
+        CreateOrcamentoUseCase,
+        PACOTE_REPOSITORY,
+      ],
     },
     {
       provide: UpdateSolicitacaoUseCase,
@@ -76,7 +95,6 @@ import { PACOTE_REPOSITORY } from '../infrastructure/providers/pacote.provider';
     GetSolicitacaoUseCase,
     GetSolicitacoesByClienteUseCase,
     SOLICITACAO_REPOSITORY,
-  ]
+  ],
 })
 export class SolicitacaoModule {}
-

@@ -7,4 +7,4 @@ export class GetContratoUseCase {
   async execute(id: string): Promise<Contrato | null> {
     return this.contratoRepository.findById(id);
   }
-} 
+}

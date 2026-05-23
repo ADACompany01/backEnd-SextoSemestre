@@ -9,4 +9,4 @@ export class UpdatePacoteUseCase {
     await this.pacoteRepository.update(id, data);
     return this.pacoteRepository.findById(id);
   }
-} 
+}

@@ -13,11 +13,16 @@ export class CreateSolicitacaoUseCase {
     private readonly clienteRepository: ClienteRepository,
   ) {}
 
-  async execute(id_cliente: string, data: CreateSolicitacaoDto): Promise<SolicitacaoModel> {
+  async execute(
+    id_cliente: string,
+    data: CreateSolicitacaoDto,
+  ): Promise<SolicitacaoModel> {
     // Verificar se o cliente existe
     const cliente = await this.clienteRepository.findById(id_cliente);
     if (!cliente) {
-      throw new NotFoundException(`Cliente com ID ${id_cliente} não encontrado`);
+      throw new NotFoundException(
+        `Cliente com ID ${id_cliente} não encontrado`,
+      );
     }
 
     return this.solicitacaoRepository.create({
@@ -30,4 +35,3 @@ export class CreateSolicitacaoUseCase {
     });
   }
 }
-

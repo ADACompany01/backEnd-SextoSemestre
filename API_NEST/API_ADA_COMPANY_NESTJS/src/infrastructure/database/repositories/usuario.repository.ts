@@ -23,7 +23,10 @@ export class UsuarioRepository {
     return this.usuarioModel.create(data);
   }
 
-  async update(id: string, data: Partial<Usuario>): Promise<[number, Usuario[]]> {
+  async update(
+    id: string,
+    data: Partial<Usuario>,
+  ): Promise<[number, Usuario[]]> {
     const [affectedCount, affectedRows] = await this.usuarioModel.update(data, {
       where: { id_usuario: id },
       returning: true,
@@ -43,4 +46,4 @@ export class UsuarioRepository {
       include: [Cliente, Funcionario],
     });
   }
-} 
+}

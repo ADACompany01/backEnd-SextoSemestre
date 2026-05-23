@@ -13,4 +13,3 @@ export class GetClienteByUsuarioUseCase {
     return this.clienteRepository.findByIdUsuario(id_usuario);
   }
 }
-

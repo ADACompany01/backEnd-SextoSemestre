@@ -1,17 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Notificacao, NotificacaoDocument } from '../schemas/notificacao.schema';
-import { NotificacaoModel, CreateNotificacaoRequest } from '../../../domain/models/notificacao.model';
+import {
+  Notificacao,
+  NotificacaoDocument,
+} from '../schemas/notificacao.schema';
+import {
+  NotificacaoModel,
+  CreateNotificacaoRequest,
+} from '../../../domain/models/notificacao.model';
 
 @Injectable()
 export class NotificacaoRepository {
   constructor(
-    @InjectModel(Notificacao.name) private notificacaoModel: Model<NotificacaoDocument>,
+    @InjectModel(Notificacao.name)
+    private notificacaoModel: Model<NotificacaoDocument>,
   ) {}
 
   // Helper para converter documento do Mongoose para NotificacaoModel
-  private toNotificacaoModel(doc: NotificacaoDocument | null): NotificacaoModel | null {
+  private toNotificacaoModel(
+    doc: NotificacaoDocument | null,
+  ): NotificacaoModel | null {
     if (!doc) return null;
     const docAny = doc as any; // Para acessar campos timestamps adicionados pelo Mongoose
     return {
@@ -29,8 +38,10 @@ export class NotificacaoRepository {
   }
 
   // Helper para converter array de documentos
-  private toNotificacaoModelArray(docs: NotificacaoDocument[]): NotificacaoModel[] {
-    return docs.map(doc => this.toNotificacaoModel(doc)!);
+  private toNotificacaoModelArray(
+    docs: NotificacaoDocument[],
+  ): NotificacaoModel[] {
+    return docs.map((doc) => this.toNotificacaoModel(doc)!);
   }
 
   async create(data: CreateNotificacaoRequest): Promise<NotificacaoModel> {
@@ -44,7 +55,10 @@ export class NotificacaoRepository {
     return this.toNotificacaoModel(doc);
   }
 
-  async findByUserId(userId: string, limit: number = 50): Promise<NotificacaoModel[]> {
+  async findByUserId(
+    userId: string,
+    limit: number = 50,
+  ): Promise<NotificacaoModel[]> {
     const docs = await this.notificacaoModel
       .find({ userId })
       .sort({ createdAt: -1 })
@@ -61,7 +75,10 @@ export class NotificacaoRepository {
     return this.toNotificacaoModelArray(docs);
   }
 
-  async marcarComoLida(id: string, userId: string): Promise<NotificacaoModel | null> {
+  async marcarComoLida(
+    id: string,
+    userId: string,
+  ): Promise<NotificacaoModel | null> {
     const doc = await this.notificacaoModel
       .findOneAndUpdate(
         { _id: id, userId },
@@ -90,8 +107,8 @@ export class NotificacaoRepository {
   }
 
   async countNaoLidas(userId: string): Promise<number> {
-    return await this.notificacaoModel.countDocuments({ userId, lida: false }).exec();
+    return await this.notificacaoModel
+      .countDocuments({ userId, lida: false })
+      .exec();
   }
 }
-
-

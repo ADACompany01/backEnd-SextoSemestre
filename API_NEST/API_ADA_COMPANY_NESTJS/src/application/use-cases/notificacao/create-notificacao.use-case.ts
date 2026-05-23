@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { NotificacaoRepository } from '../../../infrastructure/database/repositories/notificacao.repository';
-import { CreateNotificacaoRequest, NotificacaoModel } from '../../../domain/models/notificacao.model';
+import {
+  CreateNotificacaoRequest,
+  NotificacaoModel,
+} from '../../../domain/models/notificacao.model';
 
 @Injectable()
 export class CreateNotificacaoUseCase {
@@ -10,5 +13,3 @@ export class CreateNotificacaoUseCase {
     return await this.notificacaoRepository.create(data);
   }
 }
-
-

@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
@@ -15,13 +20,16 @@ export class JwtAuthGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>();
-    
+
     // Permitir requisições OPTIONS (preflight CORS) sem autenticação
     if (request.method === 'OPTIONS') {
       return true;
     }
-    
-    const isPublic = this.reflector.get<boolean>('isPublic', context.getHandler());
+
+    const isPublic = this.reflector.get<boolean>(
+      'isPublic',
+      context.getHandler(),
+    );
     if (isPublic) {
       return true;
     }
@@ -33,13 +41,14 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      const secret = process.env.NODE_ENV === 'test'
-        ? 'test-secret-key'
-        : this.configService.get<string>('JWT_SECRET');
+      const secret =
+        process.env.NODE_ENV === 'test'
+          ? 'test-secret-key'
+          : this.configService.get<string>('JWT_SECRET');
       const payload = await this.jwtService.verifyAsync(token, {
         secret: secret,
       });
-      
+
       // Adiciona o usuário ao request para uso posterior
       request.user = payload as any;
     } catch (error) {
@@ -50,7 +59,8 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private extractTokenFromHeader(request: RequestWithUser): string | undefined {
-    const [type, token] = (request.headers as any).authorization?.split(' ') ?? [];
+    const [type, token] =
+      (request.headers as any).authorization?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
-} 
+}

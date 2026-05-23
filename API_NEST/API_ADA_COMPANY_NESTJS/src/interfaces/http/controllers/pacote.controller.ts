@@ -1,8 +1,29 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, HttpStatus, Logger, HttpException, UseGuards } from '@nestjs/common';
-import { CreatePacoteDto, TipoPacote } from '../dtos/requests/create-pacote.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  HttpStatus,
+  Logger,
+  HttpException,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  CreatePacoteDto,
+  TipoPacote,
+} from '../dtos/requests/create-pacote.dto';
 import { UpdatePacoteDto } from '../dtos/requests/update-pacote.dto';
 import { PacoteResponseDto } from '../dtos/responses/pacote-response.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { FuncionarioGuard } from '../guards/funcionario.guard';
 import { CreatePacoteUseCase } from '../../../application/use-cases/pacote/create-pacote.use-case';
 import { ListPacotesUseCase } from '../../../application/use-cases/pacote/list-pacotes.use-case';
@@ -28,7 +49,11 @@ export class PacoteController {
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo pacote' })
-  @ApiResponse({ status: 201, description: 'Pacote criado com sucesso', type: PacoteResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Pacote criado com sucesso',
+    type: PacoteResponseDto,
+  })
   async create(@Body() createPacoteDto: CreatePacoteDto) {
     try {
       const pacoteModel = toPacoteModelFromCreateDto(createPacoteDto);
@@ -40,17 +65,25 @@ export class PacoteController {
       };
     } catch (error) {
       this.logger.error(`Erro ao criar pacote: ${error.message}`, error.stack);
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Erro ao criar pacote: ${error.message}`,
-        error: error.name,
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: `Erro ao criar pacote: ${error.message}`,
+          error: error.name,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar todos os pacotes' })
-  @ApiResponse({ status: 200, description: 'Lista de pacotes retornada com sucesso', type: PacoteResponseDto, isArray: true })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de pacotes retornada com sucesso',
+    type: PacoteResponseDto,
+    isArray: true,
+  })
   async findAll() {
     try {
       const pacotes = await this.listPacotesUseCase.execute();
@@ -60,27 +93,40 @@ export class PacoteController {
         data: toPacoteResponseDtoList(pacotes),
       };
     } catch (error) {
-      this.logger.error(`Erro ao listar pacotes: ${error.message}`, error.stack);
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Erro ao listar pacotes: ${error.message}`,
-        error: error.name,
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      this.logger.error(
+        `Erro ao listar pacotes: ${error.message}`,
+        error.stack,
+      );
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: `Erro ao listar pacotes: ${error.message}`,
+          error: error.name,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar pacote por ID' })
   @ApiParam({ name: 'id', description: 'ID do pacote' })
-  @ApiResponse({ status: 200, description: 'Pacote encontrado com sucesso', type: PacoteResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Pacote encontrado com sucesso',
+    type: PacoteResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Pacote não encontrado' })
   async findOne(@Param('id') id: string) {
     const pacote = await this.getPacoteUseCase.execute(id);
     if (!pacote) {
-      throw new HttpException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Pacote não encontrado',
-      }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Pacote não encontrado',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return {
       statusCode: HttpStatus.OK,
@@ -92,7 +138,11 @@ export class PacoteController {
   @Put(':id')
   @ApiOperation({ summary: 'Atualizar um pacote' })
   @ApiParam({ name: 'id', description: 'ID do pacote' })
-  @ApiResponse({ status: 200, description: 'Pacote atualizado com sucesso', type: PacoteResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Pacote atualizado com sucesso',
+    type: PacoteResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Pacote não encontrado' })
   async update(
     @Param('id') id: string,
@@ -101,10 +151,13 @@ export class PacoteController {
     const pacoteModel = toPacoteModelFromUpdateDto(updatePacoteDto, id);
     const pacote = await this.updatePacoteUseCase.execute(id, pacoteModel);
     if (!pacote) {
-      throw new HttpException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Pacote não encontrado',
-      }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Pacote não encontrado',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return {
       statusCode: HttpStatus.OK,
@@ -121,10 +174,13 @@ export class PacoteController {
   async remove(@Param('id') id: string) {
     const deleted = await this.deletePacoteUseCase.execute(id);
     if (deleted === 0) {
-      throw new HttpException({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: 'Pacote não encontrado',
-      }, HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: 'Pacote não encontrado',
+        },
+        HttpStatus.NOT_FOUND,
+      );
     }
     return {
       statusCode: HttpStatus.OK,
@@ -141,7 +197,10 @@ function toPacoteModelFromCreateDto(dto: CreatePacoteDto): Pacote {
   };
 }
 
-function toPacoteModelFromUpdateDto(dto: UpdatePacoteDto, id_pacote: string): Pacote {
+function toPacoteModelFromUpdateDto(
+  dto: UpdatePacoteDto,
+  id_pacote: string,
+): Pacote {
   return {
     id_pacote,
     id_cliente: dto.id_cliente ?? '',
@@ -161,4 +220,4 @@ function toPacoteResponseDto(pacote: Pacote): PacoteResponseDto {
 
 function toPacoteResponseDtoList(pacotes: Pacote[]): PacoteResponseDto[] {
   return pacotes.map(toPacoteResponseDto);
-} 
+}

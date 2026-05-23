@@ -9,17 +9,17 @@ export function Sanitize() {
     if (typeof value !== 'string') {
       return value;
     }
-    
+
     // Remove tags HTML
     let sanitized = value.replace(/<[^>]*>/g, '');
-    
+
     // Remove scripts inline
     sanitized = sanitized.replace(/javascript:/gi, '');
     sanitized = sanitized.replace(/on\w+\s*=/gi, '');
-    
+
     // Remove espaços extras no início e fim
     sanitized = sanitized.trim();
-    
+
     return sanitized;
   });
 }
@@ -33,20 +33,29 @@ export function SanitizeBasic() {
     if (typeof value !== 'string') {
       return value;
     }
-    
+
     // Remove apenas tags perigosas (script, iframe, object, embed)
-    let sanitized = value.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    sanitized = sanitized.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
-    sanitized = sanitized.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+    let sanitized = value.replace(
+      /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+      '',
+    );
+    sanitized = sanitized.replace(
+      /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+      '',
+    );
+    sanitized = sanitized.replace(
+      /<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi,
+      '',
+    );
     sanitized = sanitized.replace(/<embed[^>]*>/gi, '');
-    
+
     // Remove event handlers inline
     sanitized = sanitized.replace(/on\w+\s*=\s*["'][^"']*["']/gi, '');
     sanitized = sanitized.replace(/javascript:/gi, '');
-    
+
     // Remove espaços extras
     sanitized = sanitized.trim();
-    
+
     return sanitized;
   });
 }
@@ -60,7 +69,7 @@ export function EscapeHtml() {
     if (typeof value !== 'string') {
       return value;
     }
-    
+
     const htmlEscapeMap: { [key: string]: string } = {
       '&': '&amp;',
       '<': '&lt;',
@@ -69,10 +78,7 @@ export function EscapeHtml() {
       "'": '&#x27;',
       '/': '&#x2F;',
     };
-    
+
     return value.replace(/[&<>"'\/]/g, (char) => htmlEscapeMap[char]);
   });
 }
-
-
-

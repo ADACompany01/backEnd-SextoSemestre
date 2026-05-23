@@ -57,7 +57,9 @@ export class FileUploadService {
     // Limite de 10MB
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      throw new BadRequestException('Arquivo muito grande. Tamanho máximo: 10MB');
+      throw new BadRequestException(
+        'Arquivo muito grande. Tamanho máximo: 10MB',
+      );
     }
   }
 
@@ -78,11 +80,11 @@ export class FileUploadService {
     // Gerar nome único para o arquivo
     const fileExtension = path.extname(file.originalname) || '.pdf';
     const fileName = `${category}_${entityId}_${uuidv4()}${fileExtension}`;
-    
+
     // Determinar diretório baseado na categoria
     const categoryDir = category === 'orcamento' ? 'orcamentos' : 'contratos';
     const targetDir = path.join(this.uploadsDir, categoryDir);
-    
+
     // Garantir que o diretório existe
     if (!fs.existsSync(targetDir)) {
       fs.mkdirSync(targetDir, { recursive: true });
@@ -96,7 +98,7 @@ export class FileUploadService {
 
     // Retornar caminho relativo (para facilitar migração para AWS)
     const relativePath = path.join('uploads', categoryDir, fileName);
-    
+
     this.logger.log(`Arquivo salvo: ${relativePath}`);
     return relativePath;
   }
@@ -138,4 +140,3 @@ export class FileUploadService {
     return fs.readFileSync(fullPath);
   }
 }
-

@@ -18,5 +18,3 @@ export interface CreateNotificacaoRequest {
   userId: string;
   metadata?: Record<string, any>;
 }
-
-

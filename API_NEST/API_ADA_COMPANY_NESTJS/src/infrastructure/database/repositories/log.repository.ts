@@ -1,16 +1,21 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { 
-  DynamoDBDocumentClient, 
-  PutCommand, 
-  GetCommand, 
-  QueryCommand, 
+import {
+  DynamoDBDocumentClient,
+  PutCommand,
+  GetCommand,
+  QueryCommand,
   ScanCommand,
   DeleteCommand,
   BatchWriteCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { LogRepositoryInterface } from '../../../domain/repositories/log.repository.interface';
-import { LogModel, CreateLogRequest, LogFilters, LogLevel } from '../../../domain/models/log.model';
+import {
+  LogModel,
+  CreateLogRequest,
+  LogFilters,
+  LogLevel,
+} from '../../../domain/models/log.model';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
@@ -18,16 +23,21 @@ export class LogRepository implements LogRepositoryInterface {
   private readonly tableName: string;
 
   constructor(
-    @Inject('DynamoDBClient') private readonly dynamoClient: DynamoDBDocumentClient,
+    @Inject('DynamoDBClient')
+    private readonly dynamoClient: DynamoDBDocumentClient,
     private readonly configService: ConfigService,
   ) {
-    this.tableName = this.configService.get<string>('DYNAMODB_TABLE_LOGS') || 'ada-company-logs';
+    this.tableName =
+      this.configService.get<string>('DYNAMODB_TABLE_LOGS') ||
+      'ada-company-logs';
   }
 
   async create(logData: CreateLogRequest): Promise<LogModel> {
     const now = new Date().toISOString();
     const id = uuidv4();
-    const timestamp = logData.timestamp ? new Date(logData.timestamp).toISOString() : now;
+    const timestamp = logData.timestamp
+      ? new Date(logData.timestamp).toISOString()
+      : now;
 
     const logItem: LogModel = {
       id,
@@ -48,28 +58,32 @@ export class LogRepository implements LogRepositoryInterface {
       updatedAt: now,
     };
 
-    await this.dynamoClient.send(new PutCommand({
-      TableName: this.tableName,
-      Item: logItem,
-    }));
+    await this.dynamoClient.send(
+      new PutCommand({
+        TableName: this.tableName,
+        Item: logItem,
+      }),
+    );
 
     return logItem;
   }
 
   async findById(id: string, timestamp: string): Promise<LogModel | null> {
-    const result = await this.dynamoClient.send(new GetCommand({
-      TableName: this.tableName,
-      Key: { id, timestamp },
-    }));
+    const result = await this.dynamoClient.send(
+      new GetCommand({
+        TableName: this.tableName,
+        Key: { id, timestamp },
+      }),
+    );
 
-    return result.Item as LogModel || null;
+    return (result.Item as LogModel) || null;
   }
 
   async findByFilters(filters: LogFilters): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    let queryParams: any = {
+    const queryParams: any = {
       TableName: this.tableName,
       Limit: filters.limit || 100,
     };
@@ -131,26 +145,43 @@ export class LogRepository implements LogRepositoryInterface {
     const result = await this.dynamoClient.send(new ScanCommand(queryParams));
 
     return {
-      logs: result.Items as LogModel[] || [],
+      logs: (result.Items as LogModel[]) || [],
       lastEvaluatedKey: result.LastEvaluatedKey,
     };
   }
 
-  async findByUserId(userId: string, limit: number = 100, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async findByUserId(
+    userId: string,
+    limit: number = 100,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
     return this.findByFilters({ userId, limit, lastEvaluatedKey });
   }
 
-  async findByLevel(level: string, limit: number = 100, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async findByLevel(
+    level: string,
+    limit: number = 100,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    return this.findByFilters({ level: level as LogLevel, limit, lastEvaluatedKey });
+    return this.findByFilters({
+      level: level as LogLevel,
+      limit,
+      lastEvaluatedKey,
+    });
   }
 
-  async findByDateRange(startDate: string, endDate: string, limit: number = 100, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async findByDateRange(
+    startDate: string,
+    endDate: string,
+    limit: number = 100,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
@@ -169,17 +200,19 @@ export class LogRepository implements LogRepositoryInterface {
     }
 
     // Deletar em lotes
-    const deleteRequests = result.logs.map(log => ({
+    const deleteRequests = result.logs.map((log) => ({
       DeleteRequest: {
         Key: { id: log.id, timestamp: log.timestamp },
       },
     }));
 
-    await this.dynamoClient.send(new BatchWriteCommand({
-      RequestItems: {
-        [this.tableName]: deleteRequests,
-      },
-    }));
+    await this.dynamoClient.send(
+      new BatchWriteCommand({
+        RequestItems: {
+          [this.tableName]: deleteRequests,
+        },
+      }),
+    );
 
     return result.logs.length;
   }
@@ -190,23 +223,25 @@ export class LogRepository implements LogRepositoryInterface {
     byContext: Record<string, number>;
   }> {
     // Scan para obter estatísticas
-    const result = await this.dynamoClient.send(new ScanCommand({
-      TableName: this.tableName,
-      Select: 'ALL_ATTRIBUTES',
-    }));
+    const result = await this.dynamoClient.send(
+      new ScanCommand({
+        TableName: this.tableName,
+        Select: 'ALL_ATTRIBUTES',
+      }),
+    );
 
-    const logs = result.Items as LogModel[] || [];
-    
+    const logs = (result.Items as LogModel[]) || [];
+
     const stats = {
       total: logs.length,
       byLevel: {} as Record<string, number>,
       byContext: {} as Record<string, number>,
     };
 
-    logs.forEach(log => {
+    logs.forEach((log) => {
       // Contar por nível
       stats.byLevel[log.level] = (stats.byLevel[log.level] || 0) + 1;
-      
+
       // Contar por contexto
       if (log.context) {
         stats.byContext[log.context] = (stats.byContext[log.context] || 0) + 1;

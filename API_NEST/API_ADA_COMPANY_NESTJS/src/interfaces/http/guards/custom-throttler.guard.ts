@@ -9,14 +9,13 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 export class CustomThrottlerGuard extends ThrottlerGuard {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    
+
     // Permitir requisições OPTIONS (preflight CORS) sem aplicar throttling
     if (request.method === 'OPTIONS') {
       return true;
     }
-    
+
     // Para outras requisições, aplicar o throttling normal
     return super.canActivate(context);
   }
 }
-

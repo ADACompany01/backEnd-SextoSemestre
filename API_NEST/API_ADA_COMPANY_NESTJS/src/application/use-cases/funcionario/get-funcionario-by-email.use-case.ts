@@ -6,10 +6,10 @@ import { FUNCIONARIO_REPOSITORY } from '../../../infrastructure/providers/funcio
 export class GetFuncionarioByEmailUseCase {
   constructor(
     @Inject(FUNCIONARIO_REPOSITORY)
-    private readonly funcionarioRepository: FuncionarioRepository
+    private readonly funcionarioRepository: FuncionarioRepository,
   ) {}
 
   async execute(email: string): Promise<FuncionarioModel | null> {
     return this.funcionarioRepository.findByEmail(email);
   }
-} 
+}

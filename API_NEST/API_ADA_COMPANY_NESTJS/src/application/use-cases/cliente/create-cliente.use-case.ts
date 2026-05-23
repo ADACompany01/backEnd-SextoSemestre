@@ -46,11 +46,14 @@ export class CreateClienteUseCase {
       if (error instanceof HttpException) {
         throw error;
       }
-      throw new HttpException({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: `Erro ao criar cliente: ${error.message}`,
-        error: error.name,
-      }, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: `Erro ao criar cliente: ${error.message}`,
+          error: error.name,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
-} 
+}

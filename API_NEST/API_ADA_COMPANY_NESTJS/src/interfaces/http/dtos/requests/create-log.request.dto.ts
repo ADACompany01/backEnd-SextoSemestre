@@ -1,4 +1,11 @@
-import { IsEnum, IsString, IsOptional, IsNumber, IsObject, IsDateString } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsObject,
+  IsDateString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LogLevel } from '../../../../domain/models/log.model';
 

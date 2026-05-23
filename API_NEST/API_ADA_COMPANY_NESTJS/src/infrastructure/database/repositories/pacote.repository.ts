@@ -21,25 +21,22 @@ export class PacoteRepositoryImpl implements PacoteRepository {
 
   async findAll(): Promise<PacoteModel[]> {
     const pacotes = await this.pacoteModel.findAll({
-      include: [
-        Cliente,
-        Orcamento
-      ]
+      include: [Cliente, Orcamento],
     });
-    return pacotes.map(p => p.toJSON() as PacoteModel);
+    return pacotes.map((p) => p.toJSON() as PacoteModel);
   }
 
   async findById(id: string): Promise<PacoteModel | null> {
     const pacote = await this.pacoteModel.findByPk(id, {
-      include: [
-        Cliente,
-        Orcamento
-      ]
+      include: [Cliente, Orcamento],
     });
     return pacote ? (pacote.toJSON() as PacoteModel) : null;
   }
 
-  async update(id: string, data: Partial<PacoteModel>): Promise<[number, PacoteModel[]]> {
+  async update(
+    id: string,
+    data: Partial<PacoteModel>,
+  ): Promise<[number, PacoteModel[]]> {
     const [affectedCount, affectedRows] = await this.pacoteModel.update(data, {
       where: { id_pacote: id },
       returning: true,
@@ -56,11 +53,8 @@ export class PacoteRepositoryImpl implements PacoteRepository {
   async findByCliente(id_cliente: number): Promise<PacoteModel[]> {
     const pacotes = await this.pacoteModel.findAll({
       where: { id_cliente },
-      include: [
-        Cliente,
-        Orcamento
-      ]
+      include: [Cliente, Orcamento],
     });
-    return pacotes.map(p => p.toJSON() as PacoteModel);
+    return pacotes.map((p) => p.toJSON() as PacoteModel);
   }
-} 
+}

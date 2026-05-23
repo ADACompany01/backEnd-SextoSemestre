@@ -15,35 +15,38 @@ export class LighthouseService {
   private findChromiumPath(): string | null {
     try {
       // Tentar usar comandos do sistema para encontrar o navegador disponível
-      const commands = process.platform === 'win32'
-        ? [
-            'where chrome',
-            'where chrome.exe',
-            'where msedge',
-            'where msedge.exe',
-            'where chromium',
-            'where chromium.exe',
-          ]
-        : [
-            'which chromium-browser',
-            'which chromium',
-            'which google-chrome',
-            'which google-chrome-stable',
-            'command -v chromium-browser',
-            'command -v chromium',
-            'command -v google-chrome',
-            'command -v google-chrome-stable',
-          ];
-      
+      const commands =
+        process.platform === 'win32'
+          ? [
+              'where chrome',
+              'where chrome.exe',
+              'where msedge',
+              'where msedge.exe',
+              'where chromium',
+              'where chromium.exe',
+            ]
+          : [
+              'which chromium-browser',
+              'which chromium',
+              'which google-chrome',
+              'which google-chrome-stable',
+              'command -v chromium-browser',
+              'command -v chromium',
+              'command -v google-chrome',
+              'command -v google-chrome-stable',
+            ];
+
       for (const cmd of commands) {
         try {
-          const result = execSync(cmd, { 
-            encoding: 'utf-8', 
+          const result = execSync(cmd, {
+            encoding: 'utf-8',
             stdio: ['ignore', 'pipe', 'ignore'],
-            timeout: 5000 // Timeout de 5 segundos
+            timeout: 5000, // Timeout de 5 segundos
           }).trim();
-          
-          const browserPath = result.split(/\r?\n/).find(path => path && fs.existsSync(path));
+
+          const browserPath = result
+            .split(/\r?\n/)
+            .find((path) => path && fs.existsSync(path));
 
           if (browserPath && fs.existsSync(browserPath)) {
             // Verificar se é um arquivo ou link simbólico válido
@@ -51,11 +54,13 @@ export class LighthouseService {
               const stats = fs.statSync(browserPath);
               if (stats.isFile() || stats.isSymbolicLink()) {
                 // Se for link simbólico, tentar resolver
-                const resolvedPath = stats.isSymbolicLink() 
-                  ? fs.readlinkSync(browserPath) 
+                const resolvedPath = stats.isSymbolicLink()
+                  ? fs.readlinkSync(browserPath)
                   : browserPath;
-                
-                console.log(`[LighthouseService] Chromium/Chrome encontrado via comando do sistema: ${browserPath}${stats.isSymbolicLink() ? ` (link para: ${resolvedPath})` : ''}`);
+
+                console.log(
+                  `[LighthouseService] Chromium/Chrome encontrado via comando do sistema: ${browserPath}${stats.isSymbolicLink() ? ` (link para: ${resolvedPath})` : ''}`,
+                );
                 return browserPath;
               }
             } catch (statError) {
@@ -68,23 +73,25 @@ export class LighthouseService {
           continue;
         }
       }
-      
+
       // Tentar procurar manualmente em diretórios comuns
       const commonDirs = ['/usr/bin', '/usr/local/bin', '/opt/chromium'];
       for (const dir of commonDirs) {
         try {
           if (fs.existsSync(dir)) {
             const files = fs.readdirSync(dir);
-            const chromiumFiles = files.filter(f => 
-              f.includes('chromium') && !f.includes('.so')
+            const chromiumFiles = files.filter(
+              (f) => f.includes('chromium') && !f.includes('.so'),
             );
-            
+
             for (const file of chromiumFiles) {
               const fullPath = require('path').join(dir, file);
               try {
                 const stats = fs.statSync(fullPath);
                 if (stats.isFile() && (stats.mode & parseInt('111', 8)) !== 0) {
-                  console.log(`[LighthouseService] Chromium encontrado via busca manual: ${fullPath}`);
+                  console.log(
+                    `[LighthouseService] Chromium encontrado via busca manual: ${fullPath}`,
+                  );
                   return fullPath;
                 }
               } catch (e) {
@@ -96,25 +103,28 @@ export class LighthouseService {
           continue;
         }
       }
-      
+
       return null;
     } catch (error) {
-      console.warn(`[LighthouseService] Erro ao tentar encontrar Chromium via comandos do sistema: ${error.message}`);
+      console.warn(
+        `[LighthouseService] Erro ao tentar encontrar Chromium via comandos do sistema: ${error.message}`,
+      );
       return null;
     }
   }
 
   private getBrowserCandidates(dynamicPath?: string | null): string[] {
-    const windowsPaths = process.platform === 'win32'
-      ? [
-          `${process.env.PROGRAMFILES}\\Google\\Chrome\\Application\\chrome.exe`,
-          `${process.env['PROGRAMFILES(X86)']}\\Google\\Chrome\\Application\\chrome.exe`,
-          `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`,
-          `${process.env.PROGRAMFILES}\\Microsoft\\Edge\\Application\\msedge.exe`,
-          `${process.env['PROGRAMFILES(X86)']}\\Microsoft\\Edge\\Application\\msedge.exe`,
-          `${process.env.LOCALAPPDATA}\\Microsoft\\Edge\\Application\\msedge.exe`,
-        ]
-      : [];
+    const windowsPaths =
+      process.platform === 'win32'
+        ? [
+            `${process.env.PROGRAMFILES}\\Google\\Chrome\\Application\\chrome.exe`,
+            `${process.env['PROGRAMFILES(X86)']}\\Google\\Chrome\\Application\\chrome.exe`,
+            `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`,
+            `${process.env.PROGRAMFILES}\\Microsoft\\Edge\\Application\\msedge.exe`,
+            `${process.env['PROGRAMFILES(X86)']}\\Microsoft\\Edge\\Application\\msedge.exe`,
+            `${process.env.LOCALAPPDATA}\\Microsoft\\Edge\\Application\\msedge.exe`,
+          ]
+        : [];
 
     return [
       process.env.CHROME_PATH,
@@ -138,7 +148,11 @@ export class LighthouseService {
 
     try {
       const stats = fs.statSync(path);
-      return stats.isFile() && (process.platform === 'win32' || (stats.mode & parseInt('111', 8)) !== 0);
+      return (
+        stats.isFile() &&
+        (process.platform === 'win32' ||
+          (stats.mode & parseInt('111', 8)) !== 0)
+      );
     } catch (error) {
       return true;
     }
@@ -153,7 +167,7 @@ export class LighthouseService {
     const possiblePaths = this.getBrowserCandidates(this.findChromiumPath());
 
     let CHROME_EXECUTABLE_PATH = possiblePaths[0] || '/usr/bin/chromium';
-    
+
     // Procurar o Chromium nos caminhos possíveis
     for (const path of possiblePaths) {
       if (path && this.isUsableBrowserPath(path)) {
@@ -161,14 +175,17 @@ export class LighthouseService {
         break;
       }
     }
-    
+
     try {
       // Verificar se o Chromium existe
       const chromiumExists = this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH);
-      
+
       if (!chromiumExists) {
         // Listar caminhos possíveis para debug
-        const checkedPaths = possiblePaths.map(p => ({ path: p, exists: fs.existsSync(p) }));
+        const checkedPaths = possiblePaths.map((p) => ({
+          path: p,
+          exists: fs.existsSync(p),
+        }));
         return {
           chromium: {
             available: false,
@@ -182,8 +199,9 @@ export class LighthouseService {
       // Tentar iniciar o Chrome brevemente para verificar se funciona
       try {
         const chromeLauncherModule = await import('chrome-launcher');
-        const chromeLauncher = chromeLauncherModule.default || chromeLauncherModule;
-        
+        const chromeLauncher =
+          chromeLauncherModule.default || chromeLauncherModule;
+
         const chrome = await chromeLauncher.launch({
           chromePath: CHROME_EXECUTABLE_PATH,
           chromeFlags: [
@@ -193,9 +211,9 @@ export class LighthouseService {
             '--disable-gpu',
           ],
         });
-        
+
         await chrome.kill();
-        
+
         return {
           chromium: {
             available: true,
@@ -233,7 +251,7 @@ export class LighthouseService {
         const timeout = 5000; // 5 segundos
         const urlObj = new URL(url);
         const client = urlObj.protocol === 'https:' ? https : http;
-        
+
         const request = client.get(url, { timeout }, (response) => {
           // Qualquer resposta (mesmo erro 404) significa que o site está acessível
           resolve(response.statusCode !== undefined);
@@ -265,117 +283,170 @@ export class LighthouseService {
 
   async runLighthouse(url: string) {
     console.log(`[LighthouseService] Iniciando análise para: ${url}`);
-    
+
     // Validação prévia rápida da URL (5 segundos máximo)
     console.log(`[LighthouseService] Validando acessibilidade da URL...`);
     const isAccessible = await this.validateUrlAccessibility(url);
-    
+
     if (!isAccessible) {
       console.error(`[LighthouseService] URL não acessível: ${url}`);
-      throw new Error(`A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`);
+      throw new Error(
+        `A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`,
+      );
     }
     console.log(`[LighthouseService] URL validada com sucesso`);
-    
+
     // Tentar encontrar o Chromium em vários caminhos possíveis
     // No Alpine Linux, o Chromium pode estar em diferentes locais
-    
+
     // Primeiro, tentar buscar dinamicamente via comandos do sistema
     const dynamicPath = this.findChromiumPath();
-    
+
     const possiblePaths = this.getBrowserCandidates(dynamicPath);
 
     let CHROME_EXECUTABLE_PATH: string | null = null;
-    
+
     // Procurar o Chromium nos caminhos possíveis
-    console.log(`[LighthouseService] Procurando Chromium nos caminhos: ${possiblePaths.join(', ')}`);
+    console.log(
+      `[LighthouseService] Procurando Chromium nos caminhos: ${possiblePaths.join(', ')}`,
+    );
     for (const path of possiblePaths) {
       if (path && this.isUsableBrowserPath(path)) {
         // Verificar se é um arquivo executável
         try {
           const stats = fs.statSync(path);
-          if (stats.isFile() && (process.platform === 'win32' || (stats.mode & parseInt('111', 8)) !== 0)) {
+          if (
+            stats.isFile() &&
+            (process.platform === 'win32' ||
+              (stats.mode & parseInt('111', 8)) !== 0)
+          ) {
             CHROME_EXECUTABLE_PATH = path;
-            console.log(`[LighthouseService] Chromium encontrado e é executável em: ${CHROME_EXECUTABLE_PATH}`);
+            console.log(
+              `[LighthouseService] Chromium encontrado e é executável em: ${CHROME_EXECUTABLE_PATH}`,
+            );
             break;
           }
         } catch (statError) {
           // Se não conseguir verificar permissões, ainda pode tentar usar
           CHROME_EXECUTABLE_PATH = path;
-          console.log(`[LighthouseService] Chromium encontrado em: ${CHROME_EXECUTABLE_PATH} (permissões não verificadas)`);
+          console.log(
+            `[LighthouseService] Chromium encontrado em: ${CHROME_EXECUTABLE_PATH} (permissões não verificadas)`,
+          );
           break;
         }
       }
     }
-    
+
     // Verificar se o Chromium foi encontrado
-    if (!CHROME_EXECUTABLE_PATH || !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)) {
-      const checkedPaths = possiblePaths.map(p => ({ 
-        path: p, 
-        exists: p ? fs.existsSync(p) : false 
+    if (
+      !CHROME_EXECUTABLE_PATH ||
+      !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)
+    ) {
+      const checkedPaths = possiblePaths.map((p) => ({
+        path: p,
+        exists: p ? fs.existsSync(p) : false,
       }));
-      console.error(`[LighthouseService] Chromium não encontrado em nenhum dos caminhos:`, JSON.stringify(checkedPaths, null, 2));
-      
+      console.error(
+        `[LighthouseService] Chromium não encontrado em nenhum dos caminhos:`,
+        JSON.stringify(checkedPaths, null, 2),
+      );
+
       // Tentar listar o que existe em /usr/bin para debug
       try {
-        const usrBinFiles = fs.readdirSync('/usr/bin').filter(f => f.includes('chrom'));
-        console.error(`[LighthouseService] Arquivos relacionados ao chromium em /usr/bin:`, usrBinFiles);
-        
+        const usrBinFiles = fs
+          .readdirSync('/usr/bin')
+          .filter((f) => f.includes('chrom'));
+        console.error(
+          `[LighthouseService] Arquivos relacionados ao chromium em /usr/bin:`,
+          usrBinFiles,
+        );
+
         // Se encontrar chromium-browser mas não chromium, tentar criar link simbólico
-        if (usrBinFiles.includes('chromium-browser') && !usrBinFiles.includes('chromium')) {
-          console.log(`[LighthouseService] Tentando criar link simbólico em runtime...`);
+        if (
+          usrBinFiles.includes('chromium-browser') &&
+          !usrBinFiles.includes('chromium')
+        ) {
+          console.log(
+            `[LighthouseService] Tentando criar link simbólico em runtime...`,
+          );
           try {
-            execSync('ln -sf /usr/bin/chromium-browser /usr/bin/chromium', { 
+            execSync('ln -sf /usr/bin/chromium-browser /usr/bin/chromium', {
               encoding: 'utf-8',
-              stdio: 'pipe'
+              stdio: 'pipe',
             });
             // Verificar se o link foi criado
             if (fs.existsSync('/usr/bin/chromium')) {
               CHROME_EXECUTABLE_PATH = '/usr/bin/chromium';
-              console.log(`[LighthouseService] Link simbólico criado com sucesso em runtime!`);
+              console.log(
+                `[LighthouseService] Link simbólico criado com sucesso em runtime!`,
+              );
             }
           } catch (linkError: any) {
-            console.error(`[LighthouseService] Erro ao criar link simbólico:`, linkError?.message || linkError);
+            console.error(
+              `[LighthouseService] Erro ao criar link simbólico:`,
+              linkError?.message || linkError,
+            );
           }
         }
       } catch (e: any) {
-        console.error(`[LighthouseService] Não foi possível ler /usr/bin:`, e?.message || e);
+        console.error(
+          `[LighthouseService] Não foi possível ler /usr/bin:`,
+          e?.message || e,
+        );
       }
-      
+
       // Se ainda não encontrou, tentar buscar novamente
-      if (!CHROME_EXECUTABLE_PATH || !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)) {
+      if (
+        !CHROME_EXECUTABLE_PATH ||
+        !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)
+      ) {
         const retryPath = this.findChromiumPath();
         if (retryPath && this.isUsableBrowserPath(retryPath)) {
           CHROME_EXECUTABLE_PATH = retryPath;
-          console.log(`[LighthouseService] Chromium encontrado na segunda tentativa: ${CHROME_EXECUTABLE_PATH}`);
+          console.log(
+            `[LighthouseService] Chromium encontrado na segunda tentativa: ${CHROME_EXECUTABLE_PATH}`,
+          );
         }
       }
-      
+
       // Última tentativa: verificar se o arquivo existe mesmo que não tenha sido encontrado
-      if (!CHROME_EXECUTABLE_PATH || !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)) {
-        throw new Error(`Chromium não encontrado. Caminhos verificados: ${possiblePaths.filter(Boolean).join(', ')}`);
+      if (
+        !CHROME_EXECUTABLE_PATH ||
+        !this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)
+      ) {
+        throw new Error(
+          `Chromium não encontrado. Caminhos verificados: ${possiblePaths.filter(Boolean).join(', ')}`,
+        );
       }
     }
-    
+
     // Garantir que o caminho seja absoluto
     CHROME_EXECUTABLE_PATH = require('path').resolve(CHROME_EXECUTABLE_PATH);
-    console.log(`[LighthouseService] Usando Chromium em: ${CHROME_EXECUTABLE_PATH}`);
-    
+    console.log(
+      `[LighthouseService] Usando Chromium em: ${CHROME_EXECUTABLE_PATH}`,
+    );
+
     // Verificação final antes de passar para o chrome-launcher
     if (!this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)) {
-      console.error(`[LighthouseService] ERRO CRÍTICO: Caminho do Chromium não existe após resolução: ${CHROME_EXECUTABLE_PATH}`);
+      console.error(
+        `[LighthouseService] ERRO CRÍTICO: Caminho do Chromium não existe após resolução: ${CHROME_EXECUTABLE_PATH}`,
+      );
       // Como último recurso, tentar usar o chrome-launcher sem especificar o caminho
-      console.warn(`[LighthouseService] Tentando usar chrome-launcher sem especificar caminho (busca automática)...`);
+      console.warn(
+        `[LighthouseService] Tentando usar chrome-launcher sem especificar caminho (busca automática)...`,
+      );
       CHROME_EXECUTABLE_PATH = null; // Será undefined para o chrome-launcher usar busca automática
     }
-    
+
     let chrome: any = null;
 
     try {
       console.log(`[LighthouseService] Iniciando Chrome Launcher...`);
       // Importação dinâmica do chrome-launcher (ES Module)
       const chromeLauncherModule = await import('chrome-launcher');
-      const chromeLauncher = chromeLauncherModule.default || chromeLauncherModule;
-      
+      const chromeLauncher =
+        chromeLauncherModule.default || chromeLauncherModule;
+
       // Configurar opções do chrome-launcher
       const launchOptions: any = {
         logLevel: 'silent', // Reduzir logs do chrome-launcher
@@ -398,37 +469,63 @@ export class LighthouseService {
           '--disable-breakpad',
         ],
       };
-      
+
       // Verificação final antes de lançar - se o caminho não existir, remover e deixar busca automática
-      if (CHROME_EXECUTABLE_PATH && this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)) {
+      if (
+        CHROME_EXECUTABLE_PATH &&
+        this.isUsableBrowserPath(CHROME_EXECUTABLE_PATH)
+      ) {
         launchOptions.chromePath = CHROME_EXECUTABLE_PATH;
-        console.log(`[LighthouseService] Iniciando Chrome Launcher com caminho específico: ${CHROME_EXECUTABLE_PATH}`);
+        console.log(
+          `[LighthouseService] Iniciando Chrome Launcher com caminho específico: ${CHROME_EXECUTABLE_PATH}`,
+        );
       } else {
-        console.warn(`[LighthouseService] Caminho do Chromium não especificado ou inválido. Tentando última busca antes de usar busca automática...`);
+        console.warn(
+          `[LighthouseService] Caminho do Chromium não especificado ou inválido. Tentando última busca antes de usar busca automática...`,
+        );
         // Tentar mais uma vez encontrar o Chromium
         const lastAttempt = this.findChromiumPath();
         if (lastAttempt && this.isUsableBrowserPath(lastAttempt)) {
           launchOptions.chromePath = lastAttempt;
-          console.log(`[LighthouseService] Chromium encontrado no último momento: ${lastAttempt}`);
+          console.log(
+            `[LighthouseService] Chromium encontrado no último momento: ${lastAttempt}`,
+          );
         } else {
           // Não definir chromePath - o chrome-launcher vai tentar encontrar automaticamente
-          console.warn(`[LighthouseService] Deixando chrome-launcher encontrar Chromium automaticamente (sem especificar caminho)...`);
+          console.warn(
+            `[LighthouseService] Deixando chrome-launcher encontrar Chromium automaticamente (sem especificar caminho)...`,
+          );
         }
       }
-      
+
       // Verificação de segurança final: se o caminho foi especificado, garantir que existe
-      if (launchOptions.chromePath && !fs.existsSync(launchOptions.chromePath)) {
-        console.error(`[LighthouseService] Caminho especificado não existe: ${launchOptions.chromePath}. Removendo e usando busca automática.`);
+      if (
+        launchOptions.chromePath &&
+        !fs.existsSync(launchOptions.chromePath)
+      ) {
+        console.error(
+          `[LighthouseService] Caminho especificado não existe: ${launchOptions.chromePath}. Removendo e usando busca automática.`,
+        );
         delete launchOptions.chromePath;
       }
-      
+
       chrome = await chromeLauncher.launch(launchOptions);
-      console.log(`[LighthouseService] Chrome iniciado com sucesso na porta: ${chrome.port}`);
+      console.log(
+        `[LighthouseService] Chrome iniciado com sucesso na porta: ${chrome.port}`,
+      );
     } catch (error) {
       const errorMessage = error.message || error.toString();
-      console.error(`[LighthouseService] Erro ao iniciar Chrome:`, errorMessage);
-      if (errorMessage.includes('ENOENT') || errorMessage.includes('not found')) {
-        throw new Error(`Chromium não encontrado no caminho: ${CHROME_EXECUTABLE_PATH}. Verifique a instalação do Chromium no container.`);
+      console.error(
+        `[LighthouseService] Erro ao iniciar Chrome:`,
+        errorMessage,
+      );
+      if (
+        errorMessage.includes('ENOENT') ||
+        errorMessage.includes('not found')
+      ) {
+        throw new Error(
+          `Chromium não encontrado no caminho: ${CHROME_EXECUTABLE_PATH}. Verifique a instalação do Chromium no container.`,
+        );
       }
       throw new Error(`Erro ao iniciar o Chrome: ${errorMessage}`);
     }
@@ -460,70 +557,98 @@ export class LighthouseService {
       // Importação dinâmica do Lighthouse (ES Module)
       const lighthouseModule = await import('lighthouse');
       const lighthouse = lighthouseModule.default;
-      
+
       if (typeof lighthouse !== 'function') {
         throw new Error('Função lighthouse não encontrada no módulo');
       }
-      
+
       // Timeout total de 45 segundos para a execução do Lighthouse (reduzido para evitar timeout do proxy)
       const lighthouseStartTime = Date.now();
       const lighthousePromise = lighthouse(url, options);
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
-          reject(new Error('Timeout: A análise do Lighthouse excedeu o tempo limite de 45 segundos'));
+          reject(
+            new Error(
+              'Timeout: A análise do Lighthouse excedeu o tempo limite de 45 segundos',
+            ),
+          );
         }, 45000); // Reduzido para 45 segundos
       });
-      
-      const runnerResult = await Promise.race([lighthousePromise, timeoutPromise]) as any;
+
+      const runnerResult = (await Promise.race([
+        lighthousePromise,
+        timeoutPromise,
+      ])) as any;
       const lighthouseDuration = Date.now() - lighthouseStartTime;
-      console.log(`[LighthouseService] Lighthouse executado com sucesso em ${lighthouseDuration}ms`);
+      console.log(
+        `[LighthouseService] Lighthouse executado com sucesso em ${lighthouseDuration}ms`,
+      );
       const reportJson = Array.isArray(runnerResult.report)
         ? runnerResult.report[0]
         : runnerResult.report;
-      const reportObject = runnerResult.lhr || (typeof reportJson === 'string'
-        ? JSON.parse(reportJson)
-        : reportJson);
+      const reportObject =
+        runnerResult.lhr ||
+        (typeof reportJson === 'string' ? JSON.parse(reportJson) : reportJson);
       try {
         await chrome.kill();
         chrome = null;
       } catch (killError: any) {
-        console.warn(`[LighthouseService] Chrome finalizou a análise, mas houve erro ao limpar arquivos temporários: ${killError?.message || killError}`);
+        console.warn(
+          `[LighthouseService] Chrome finalizou a análise, mas houve erro ao limpar arquivos temporários: ${killError?.message || killError}`,
+        );
         chrome = null;
       }
 
       if (!reportObject) {
         throw new Error('Resultado do Lighthouse vazio ou inválido');
       }
-      
+
       // Verificar detalhes da navegação (sem logs excessivos)
-      const finalUrl = reportObject.finalDisplayedUrl || reportObject.finalUrl || reportObject.requestedUrl;
+      const finalUrl =
+        reportObject.finalDisplayedUrl ||
+        reportObject.finalUrl ||
+        reportObject.requestedUrl;
       const runtimeError = reportObject.runtimeError;
-      
+
       // Se há erro de runtime ou URL final é chrome-error, significa que não conseguiu acessar
-      if (runtimeError || 
-          (finalUrl && finalUrl.includes('chrome-error://')) ||
-          (finalUrl && finalUrl.includes('data:text/html')) ||
-          reportObject.categories.accessibility.score === null) {
-        throw new Error(`A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`);
+      if (
+        runtimeError ||
+        (finalUrl && finalUrl.includes('chrome-error://')) ||
+        (finalUrl && finalUrl.includes('data:text/html')) ||
+        reportObject.categories.accessibility.score === null
+      ) {
+        throw new Error(
+          `A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`,
+        );
       }
-      
+
       const auditsArray = Object.values(reportObject.audits) as any[];
-      const reprovadas = auditsArray.filter(a => a.score === 0);
-      const aprovadas = auditsArray.filter(a => a.score === 1);
-      const manuais = auditsArray.filter(a => a.score === null && a.scoreDisplayMode === 'manual');
-      const naoAplicaveis = auditsArray.filter(a => a.scoreDisplayMode === 'notApplicable');
-      
+      const reprovadas = auditsArray.filter((a) => a.score === 0);
+      const aprovadas = auditsArray.filter((a) => a.score === 1);
+      const manuais = auditsArray.filter(
+        (a) => a.score === null && a.scoreDisplayMode === 'manual',
+      );
+      const naoAplicaveis = auditsArray.filter(
+        (a) => a.scoreDisplayMode === 'notApplicable',
+      );
+
       // Verificar se retornou dados válidos (se tudo está vazio, algo deu errado)
-      if (reprovadas.length === 0 && aprovadas.length === 0 && manuais.length === 0) {
-        throw new Error(`A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`);
+      if (
+        reprovadas.length === 0 &&
+        aprovadas.length === 0 &&
+        manuais.length === 0
+      ) {
+        throw new Error(
+          `A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`,
+        );
       }
-      
+
       return {
         notaAcessibilidade: reportObject.categories.accessibility.score * 100,
         reprovadas,
         aprovadas,
         manuais,
-        naoAplicaveis
+        naoAplicaveis,
       };
     } catch (error) {
       // Garantir que o Chrome seja fechado mesmo em caso de erro
@@ -534,42 +659,62 @@ export class LighthouseService {
           // Ignorar erros ao matar o Chrome
         }
       }
-      
+
       // Identificar tipo de erro
       const errorMessage = error.message || error.toString();
-      console.error(`[LighthouseService] Erro original na execução do Lighthouse:`, errorMessage);
+      console.error(
+        `[LighthouseService] Erro original na execução do Lighthouse:`,
+        errorMessage,
+      );
       if (error.stack) {
         console.error(`[LighthouseService] Stack original:`, error.stack);
       }
-      
+
       // Erros de timeout
-      if (errorMessage.includes('Timeout') || errorMessage.includes('timeout')) {
-        throw new Error(`A análise do site demorou muito tempo. Tente novamente ou verifique se o site está acessível.`);
-      }
-      
-      // Erros comuns de URL inacessível
-      if (errorMessage.includes('ECONNREFUSED 127.0.0.1')) {
-        throw new Error(`Erro ao conectar no Chrome local. Verifique se o navegador consegue iniciar em modo headless.`);
+      if (
+        errorMessage.includes('Timeout') ||
+        errorMessage.includes('timeout')
+      ) {
+        throw new Error(
+          `A análise do site demorou muito tempo. Tente novamente ou verifique se o site está acessível.`,
+        );
       }
 
-      if (errorMessage.includes('ENOTFOUND') || 
-          errorMessage.includes('ECONNREFUSED') ||
-          errorMessage.includes('net::ERR_NAME_NOT_RESOLVED') ||
-          errorMessage.includes('ERR_CONNECTION')) {
-        throw new Error(`A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`);
+      // Erros comuns de URL inacessível
+      if (errorMessage.includes('ECONNREFUSED 127.0.0.1')) {
+        throw new Error(
+          `Erro ao conectar no Chrome local. Verifique se o navegador consegue iniciar em modo headless.`,
+        );
       }
-      
+
+      if (
+        errorMessage.includes('ENOTFOUND') ||
+        errorMessage.includes('ECONNREFUSED') ||
+        errorMessage.includes('net::ERR_NAME_NOT_RESOLVED') ||
+        errorMessage.includes('ERR_CONNECTION')
+      ) {
+        throw new Error(
+          `A URL "${url}" não pôde ser acessada. Verifique se o endereço está correto e se o site está online.`,
+        );
+      }
+
       // Erros relacionados ao Chrome/Chromium
-      if (errorMessage.includes('ENOENT') || 
-          errorMessage.includes('not found') ||
-          errorMessage.includes('No usable sandbox') ||
-          errorMessage.includes('Chrome local') ||
-          errorMessage.includes('Chromium')) {
-        throw new Error(`Erro na configuração do navegador. Entre em contato com o suporte técnico.`);
+      if (
+        errorMessage.includes('ENOENT') ||
+        errorMessage.includes('not found') ||
+        errorMessage.includes('No usable sandbox') ||
+        errorMessage.includes('Chrome local') ||
+        errorMessage.includes('Chromium')
+      ) {
+        throw new Error(
+          `Erro na configuração do navegador. Entre em contato com o suporte técnico.`,
+        );
       }
-      
+
       // Outros erros - mensagem genérica sem mencionar Lighthouse
-      throw new Error(`Não foi possível analisar o site. Verifique se a URL está correta e tente novamente.`);
+      throw new Error(
+        `Não foi possível analisar o site. Verifique se a URL está correta e tente novamente.`,
+      );
     }
   }
 }

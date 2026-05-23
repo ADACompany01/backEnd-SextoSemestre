@@ -13,13 +13,13 @@ export class ClienteRepositoryImpl implements ClienteRepository {
 
   async findAll(): Promise<Cliente[]> {
     return this.clienteModel.findAll({
-      include: [Usuario]
+      include: [Usuario],
     });
   }
 
   async findOne(id: string): Promise<Cliente | null> {
     return this.clienteModel.findByPk(id, {
-      include: [Usuario]
+      include: [Usuario],
     });
   }
 
@@ -27,7 +27,10 @@ export class ClienteRepositoryImpl implements ClienteRepository {
     return this.clienteModel.create(cliente);
   }
 
-  async update(id: string, data: Partial<Cliente>): Promise<[number, Cliente[]]> {
+  async update(
+    id: string,
+    data: Partial<Cliente>,
+  ): Promise<[number, Cliente[]]> {
     return this.clienteModel.update(data, {
       where: { id_cliente: id },
       returning: true,
@@ -43,14 +46,14 @@ export class ClienteRepositoryImpl implements ClienteRepository {
   async findByEmail(email: string): Promise<Cliente | null> {
     return this.clienteModel.findOne({
       where: { email },
-      include: [Usuario]
+      include: [Usuario],
     });
   }
 
   async findByCnpj(cnpj: string): Promise<Cliente | null> {
     return this.clienteModel.findOne({
       where: { cnpj },
-      include: [Usuario]
+      include: [Usuario],
     });
   }
 
@@ -61,7 +64,7 @@ export class ClienteRepositoryImpl implements ClienteRepository {
   async findByIdUsuario(id_usuario: string): Promise<Cliente | null> {
     return this.clienteModel.findOne({
       where: { id_usuario },
-      include: [Usuario]
+      include: [Usuario],
     });
   }
-} 
+}

@@ -6,4 +6,4 @@ export interface ContratoRepositoryInterface {
   findAll(): Promise<Contrato[]>;
   update(cod_contrato: string, data: Partial<Contrato>): Promise<Contrato>;
   delete(cod_contrato: string): Promise<void>;
-} 
+}

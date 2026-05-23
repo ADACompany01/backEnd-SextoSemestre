@@ -13,37 +13,49 @@ export class ContratoRepository {
 
   async findAll(): Promise<Contrato[]> {
     return this.contratoModel.findAll({
-      include: [{
-        model: Orcamento,
-        include: [{
-          model: Pacote,
-          include: ['cliente']
-        }]
-      }],
+      include: [
+        {
+          model: Orcamento,
+          include: [
+            {
+              model: Pacote,
+              include: ['cliente'],
+            },
+          ],
+        },
+      ],
     });
   }
 
   async findOne(id: string): Promise<Contrato | null> {
     return this.contratoModel.findByPk(id, {
-      include: [{
-        model: Orcamento,
-        include: [{
-          model: Pacote,
-          include: ['cliente']
-        }]
-      }],
+      include: [
+        {
+          model: Orcamento,
+          include: [
+            {
+              model: Pacote,
+              include: ['cliente'],
+            },
+          ],
+        },
+      ],
     });
   }
 
   async findById(id: string): Promise<Contrato | null> {
     return this.contratoModel.findByPk(id, {
-      include: [{
-        model: Orcamento,
-        include: [{
-          model: Pacote,
-          include: ['cliente']
-        }]
-      }],
+      include: [
+        {
+          model: Orcamento,
+          include: [
+            {
+              model: Pacote,
+              include: ['cliente'],
+            },
+          ],
+        },
+      ],
     });
   }
 
@@ -51,7 +63,10 @@ export class ContratoRepository {
     return this.contratoModel.create(data);
   }
 
-  async update(id: string, data: Partial<Contrato>): Promise<[number, Contrato[]]> {
+  async update(
+    id: string,
+    data: Partial<Contrato>,
+  ): Promise<[number, Contrato[]]> {
     return this.contratoModel.update(data, {
       where: { id_contrato: id },
       returning: true,
@@ -66,27 +81,35 @@ export class ContratoRepository {
 
   async findByCliente(id_cliente: string): Promise<Contrato[]> {
     return this.contratoModel.findAll({
-      include: [{
-        model: Orcamento,
-        include: [{
-          model: Pacote,
-          where: { id_cliente },
-          include: ['cliente']
-        }]
-      }],
+      include: [
+        {
+          model: Orcamento,
+          include: [
+            {
+              model: Pacote,
+              where: { id_cliente },
+              include: ['cliente'],
+            },
+          ],
+        },
+      ],
     });
   }
 
   async findByOrcamento(cod_orcamento: string): Promise<Contrato[]> {
     return this.contratoModel.findAll({
       where: { cod_orcamento },
-      include: [{
-        model: Orcamento,
-        include: [{
-          model: Pacote,
-          include: ['cliente']
-        }]
-      }],
+      include: [
+        {
+          model: Orcamento,
+          include: [
+            {
+              model: Pacote,
+              include: ['cliente'],
+            },
+          ],
+        },
+      ],
     });
   }
-} 
+}

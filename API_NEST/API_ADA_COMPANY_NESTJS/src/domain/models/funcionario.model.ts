@@ -4,4 +4,4 @@ export interface Funcionario {
   email: string;
   telefone: string;
   id_usuario?: string;
-} 
+}

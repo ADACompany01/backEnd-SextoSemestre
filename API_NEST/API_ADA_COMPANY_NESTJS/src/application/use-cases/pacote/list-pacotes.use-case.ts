@@ -7,4 +7,4 @@ export class ListPacotesUseCase {
   async execute(): Promise<PacoteModel[]> {
     return this.pacoteRepository.findAll();
   }
-} 
+}

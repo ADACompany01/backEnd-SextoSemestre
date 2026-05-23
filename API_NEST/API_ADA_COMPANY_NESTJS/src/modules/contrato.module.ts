@@ -6,7 +6,10 @@ import { ClienteModule } from '../modules/cliente.module';
 import { PacoteModule } from '../modules/pacote.module';
 import { FuncionarioModule } from '../modules/funcionario.module';
 import { OrcamentoModule } from '../modules/orcamento.module';
-import { ContratoRepositoryProvider, CONTRATO_REPOSITORY } from '../infrastructure/providers/contrato.provider';
+import {
+  ContratoRepositoryProvider,
+  CONTRATO_REPOSITORY,
+} from '../infrastructure/providers/contrato.provider';
 import { CreateContratoUseCase } from '../application/use-cases/contrato/create-contrato.use-case';
 import { ListContratosUseCase } from '../application/use-cases/contrato/list-contratos.use-case';
 import { GetContratoUseCase } from '../application/use-cases/contrato/get-contrato.use-case';
@@ -32,12 +35,14 @@ import { ORCAMENTO_REPOSITORY } from '../infrastructure/providers/orcamento.prov
     FileUploadService,
     {
       provide: CreateContratoUseCase,
-      useFactory: (contratoRepo, orcamentoRepo) => new CreateContratoUseCase(contratoRepo, orcamentoRepo),
+      useFactory: (contratoRepo, orcamentoRepo) =>
+        new CreateContratoUseCase(contratoRepo, orcamentoRepo),
       inject: [CONTRATO_REPOSITORY, ORCAMENTO_REPOSITORY],
     },
     {
       provide: UpdateContratoUseCase,
-      useFactory: (contratoRepo, orcamentoRepo) => new UpdateContratoUseCase(contratoRepo, orcamentoRepo),
+      useFactory: (contratoRepo, orcamentoRepo) =>
+        new UpdateContratoUseCase(contratoRepo, orcamentoRepo),
       inject: [CONTRATO_REPOSITORY, ORCAMENTO_REPOSITORY],
     },
     {
@@ -57,7 +62,8 @@ import { ORCAMENTO_REPOSITORY } from '../infrastructure/providers/orcamento.prov
     },
     {
       provide: SignContratoUseCase,
-      useFactory: (contratoRepo, signatureService) => new SignContratoUseCase(contratoRepo, signatureService),
+      useFactory: (contratoRepo, signatureService) =>
+        new SignContratoUseCase(contratoRepo, signatureService),
       inject: [CONTRATO_REPOSITORY, SignatureService],
     },
   ],
@@ -68,6 +74,6 @@ import { ORCAMENTO_REPOSITORY } from '../infrastructure/providers/orcamento.prov
     UpdateContratoUseCase,
     DeleteContratoUseCase,
     CONTRATO_REPOSITORY,
-  ]
+  ],
 })
-export class ContratoModule {} 
+export class ContratoModule {}

@@ -7,4 +7,3 @@ export const SolicitacaoRepositoryProvider: Provider = {
   provide: SOLICITACAO_REPOSITORY,
   useClass: SolicitacaoRepositoryImpl,
 };
-

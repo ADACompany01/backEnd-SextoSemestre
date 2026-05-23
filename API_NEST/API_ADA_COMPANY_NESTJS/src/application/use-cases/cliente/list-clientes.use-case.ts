@@ -12,4 +12,4 @@ export class ListClientesUseCase {
   async execute(): Promise<Cliente[]> {
     return this.clienteRepository.findAll();
   }
-} 
+}

@@ -7,4 +7,4 @@ export class GetPacoteUseCase {
   async execute(id: string): Promise<PacoteModel | null> {
     return this.pacoteRepository.findById(id);
   }
-} 
+}

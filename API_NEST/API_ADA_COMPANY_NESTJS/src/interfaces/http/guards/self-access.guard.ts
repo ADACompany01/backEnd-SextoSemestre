@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { GetClienteUseCase } from '../../../application/use-cases/cliente/get-cliente.use-case';
 import { Cliente as ClienteModel } from '../../../domain/models/cliente.model';
@@ -9,9 +15,7 @@ export class SelfAccessGuard implements CanActivate {
 
   constructor(private readonly getClienteUseCase: GetClienteUseCase) {}
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const id = request.params.id;
@@ -40,7 +44,7 @@ export class SelfAccessGuard implements CanActivate {
         // Compara o id_usuario do token com o id_usuario do cliente
         const tokenUserId = String(user.id_usuario);
         const clienteUserId = String((cliente as ClienteModel).id_usuario); // Assumindo que o model tem id_usuario
-        
+
         this.logger.debug(`Token User ID: ${tokenUserId}`);
         this.logger.debug(`Cliente User ID: ${clienteUserId}`);
 
@@ -53,6 +57,8 @@ export class SelfAccessGuard implements CanActivate {
       }
     }
 
-    throw new UnauthorizedException('Você não tem permissão para acessar estes dados');
+    throw new UnauthorizedException(
+      'Você não tem permissão para acessar estes dados',
+    );
   }
-} 
+}

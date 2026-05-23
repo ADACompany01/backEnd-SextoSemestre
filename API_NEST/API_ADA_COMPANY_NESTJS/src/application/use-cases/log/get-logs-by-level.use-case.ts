@@ -9,7 +9,11 @@ export class GetLogsByLevelUseCase {
     private readonly logRepository: LogRepositoryInterface,
   ) {}
 
-  async execute(level: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async execute(
+    level: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {

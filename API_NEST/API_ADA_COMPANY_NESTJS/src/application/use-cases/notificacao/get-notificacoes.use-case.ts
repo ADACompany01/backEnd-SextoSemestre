@@ -6,7 +6,10 @@ import { NotificacaoModel } from '../../../domain/models/notificacao.model';
 export class GetNotificacoesUseCase {
   constructor(private readonly notificacaoRepository: NotificacaoRepository) {}
 
-  async execute(userId: string, apenasNaoLidas: boolean = false): Promise<NotificacaoModel[]> {
+  async execute(
+    userId: string,
+    apenasNaoLidas: boolean = false,
+  ): Promise<NotificacaoModel[]> {
     if (apenasNaoLidas) {
       return await this.notificacaoRepository.findNaoLidasByUserId(userId);
     }
@@ -17,5 +20,3 @@ export class GetNotificacoesUseCase {
     return await this.notificacaoRepository.countNaoLidas(userId);
   }
 }
-
-

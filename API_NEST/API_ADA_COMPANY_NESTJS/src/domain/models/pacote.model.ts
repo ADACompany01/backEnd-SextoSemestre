@@ -5,4 +5,4 @@ export interface Pacote {
   id_cliente: string;
   tipo_pacote: TipoPacote;
   valor_base: number;
-} 
+}

@@ -7,7 +7,8 @@ export class ConfigService {
 
   get jwtConfig() {
     return {
-      secret: this.configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
+      secret:
+        this.configService.get<string>('JWT_SECRET') || 'defaultSecretKey',
       expiresIn: '1h',
     };
   }

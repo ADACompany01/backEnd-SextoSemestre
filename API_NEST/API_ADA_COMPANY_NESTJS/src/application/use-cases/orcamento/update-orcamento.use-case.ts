@@ -3,9 +3,14 @@ import { OrcamentoRepositoryInterface } from '../../../domain/repositories/orcam
 import { UpdateOrcamentoDto } from '../../../interfaces/http/dtos/requests/update-orcamento.dto';
 
 export class UpdateOrcamentoUseCase {
-  constructor(private readonly orcamentoRepository: OrcamentoRepositoryInterface) {}
+  constructor(
+    private readonly orcamentoRepository: OrcamentoRepositoryInterface,
+  ) {}
 
-  async execute(id: string, data: Partial<UpdateOrcamentoDto>): Promise<[number, OrcamentoModel[]]> {
+  async execute(
+    id: string,
+    data: Partial<UpdateOrcamentoDto>,
+  ): Promise<[number, OrcamentoModel[]]> {
     return this.orcamentoRepository.update(id, data);
   }
-} 
+}

@@ -16,8 +16,10 @@ export class CreatePacoteUseCase {
   async execute(data: CreatePacoteDto): Promise<PacoteModel> {
     const cliente = await this.clienteRepository.findById(data.id_cliente);
     if (!cliente) {
-      throw new NotFoundException(`Cliente com ID ${data.id_cliente} não encontrado`);
+      throw new NotFoundException(
+        `Cliente com ID ${data.id_cliente} não encontrado`,
+      );
     }
     return this.pacoteRepository.create(data);
   }
-} 
+}

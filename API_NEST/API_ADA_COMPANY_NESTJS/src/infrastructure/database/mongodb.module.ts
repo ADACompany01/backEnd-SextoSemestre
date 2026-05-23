@@ -12,7 +12,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         // No Docker, o docker-compose define MONGODB_HOST=mongodb explicitamente
         const host = configService.get<string>('MONGODB_HOST') || 'localhost';
         const port = configService.get<string>('MONGODB_PORT') || '27017';
-        const database = configService.get<string>('MONGODB_DATABASE') || 'adacompany';
+        const database =
+          configService.get<string>('MONGODB_DATABASE') || 'adacompany';
         const username = configService.get<string>('MONGODB_USERNAME');
         const password = configService.get<string>('MONGODB_PASSWORD');
 
@@ -28,8 +29,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           uri = `mongodb://${host}:${port}/${database}`;
         }
 
-        console.log(`[MongoDB] Conectando a: ${uri.replace(/:[^:@]+@/, ':****@')}`); // Log sem senha
-        console.log(`[MongoDB] Host: ${host}, Port: ${port}, Database: ${database}`);
+        console.log(
+          `[MongoDB] Conectando a: ${uri.replace(/:[^:@]+@/, ':****@')}`,
+        ); // Log sem senha
+        console.log(
+          `[MongoDB] Host: ${host}, Port: ${port}, Database: ${database}`,
+        );
 
         return {
           uri,
@@ -51,5 +56,3 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   exports: [MongooseModule],
 })
 export class MongoDBModule {}
-
-

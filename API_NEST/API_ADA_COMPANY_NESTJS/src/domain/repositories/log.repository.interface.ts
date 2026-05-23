@@ -7,15 +7,28 @@ export interface LogRepositoryInterface {
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }>;
-  findByUserId(userId: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  findByUserId(
+    userId: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }>;
-  findByLevel(level: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  findByLevel(
+    level: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }>;
-  findByDateRange(startDate: string, endDate: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  findByDateRange(
+    startDate: string,
+    endDate: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }>;

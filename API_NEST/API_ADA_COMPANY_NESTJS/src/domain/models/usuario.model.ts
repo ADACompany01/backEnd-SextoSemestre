@@ -5,4 +5,4 @@ export interface Usuario {
   email: string;
   senha: string;
   tipo_usuario: 'funcionario' | 'cliente';
-} 
+}

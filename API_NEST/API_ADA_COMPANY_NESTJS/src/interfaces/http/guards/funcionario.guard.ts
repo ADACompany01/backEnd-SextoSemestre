@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { Inject } from '@nestjs/common';
 import { FUNCIONARIO_REPOSITORY } from '../../../infrastructure/providers/funcionario.provider';
@@ -11,9 +16,7 @@ export class FuncionarioGuard implements CanActivate {
     private readonly funcionarioRepository: FuncionarioRepository,
   ) {}
 
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
@@ -23,12 +26,16 @@ export class FuncionarioGuard implements CanActivate {
 
     // CORRIGIDO: Permite acesso APENAS para funcionários
     if (user.tipo_usuario !== 'funcionario') {
-      throw new UnauthorizedException('Acesso negado. Apenas funcionários podem acessar este recurso.');
+      throw new UnauthorizedException(
+        'Acesso negado. Apenas funcionários podem acessar este recurso.',
+      );
     }
 
     // Verifica se o funcionário existe no repositório
     try {
-      const funcionario = await this.funcionarioRepository.findByEmail(user.email);
+      const funcionario = await this.funcionarioRepository.findByEmail(
+        user.email,
+      );
       if (!funcionario) {
         throw new UnauthorizedException('Funcionário não encontrado');
       }

@@ -38,26 +38,45 @@ export class NotificacaoController {
 
   @Post()
   @ApiOperation({ summary: 'Criar uma nova notificação' })
-  @ApiResponse({ status: 201, description: 'Notificação criada com sucesso', type: NotificacaoResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Notificação criada com sucesso',
+    type: NotificacaoResponseDto,
+  })
   async create(@Body() createDto: CreateNotificacaoRequestDto) {
     return await this.createNotificacaoUseCase.execute(createDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar notificações do usuário' })
-  @ApiQuery({ name: 'apenasNaoLidas', required: false, type: Boolean, description: 'Filtrar apenas não lidas' })
-  @ApiResponse({ status: 200, description: 'Lista de notificações', type: [NotificacaoResponseDto] })
+  @ApiQuery({
+    name: 'apenasNaoLidas',
+    required: false,
+    type: Boolean,
+    description: 'Filtrar apenas não lidas',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de notificações',
+    type: [NotificacaoResponseDto],
+  })
   async list(
     @GetUser('id') userId: string,
     @Query('apenasNaoLidas') apenasNaoLidas?: string,
   ) {
     const apenasNaoLidasBool = apenasNaoLidas === 'true';
-    return await this.getNotificacoesUseCase.execute(userId, apenasNaoLidasBool);
+    return await this.getNotificacoesUseCase.execute(
+      userId,
+      apenasNaoLidasBool,
+    );
   }
 
   @Get('count')
   @ApiOperation({ summary: 'Contar notificações não lidas' })
-  @ApiResponse({ status: 200, description: 'Contagem de notificações não lidas' })
+  @ApiResponse({
+    status: 200,
+    description: 'Contagem de notificações não lidas',
+  })
   async countNaoLidas(@GetUser('id') userId: string) {
     const count = await this.getNotificacoesUseCase.countNaoLidas(userId);
     return { count };
@@ -67,21 +86,24 @@ export class NotificacaoController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar notificação como lida' })
   @ApiParam({ name: 'id', description: 'ID da notificação' })
-  @ApiResponse({ status: 200, description: 'Notificação marcada como lida', type: NotificacaoResponseDto })
-  async marcarLida(
-    @Param('id') id: string,
-    @GetUser('id') userId: string,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'Notificação marcada como lida',
+    type: NotificacaoResponseDto,
+  })
+  async marcarLida(@Param('id') id: string, @GetUser('id') userId: string) {
     return await this.marcarNotificacaoLidaUseCase.execute(id, userId);
   }
 
   @Post('marcar-todas-lidas')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Marcar todas as notificações como lidas' })
-  @ApiResponse({ status: 200, description: 'Número de notificações marcadas como lidas' })
+  @ApiResponse({
+    status: 200,
+    description: 'Número de notificações marcadas como lidas',
+  })
   async marcarTodasLidas(@GetUser('id') userId: string) {
     const count = await this.marcarNotificacaoLidaUseCase.marcarTodas(userId);
     return { count };
   }
 }
-

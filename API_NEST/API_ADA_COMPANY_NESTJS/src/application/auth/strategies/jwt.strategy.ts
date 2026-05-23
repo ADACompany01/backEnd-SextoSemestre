@@ -9,7 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
     private configService: ConfigService,
-    ) {
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -24,4 +24,4 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
     return user;
   }
-} 
+}

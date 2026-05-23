@@ -6,8 +6,8 @@ import { IsOptional, IsNumber, IsDateString, IsUUID } from 'class-validator';
 export class UpdateOrcamentoDto extends PartialType(CreateOrcamentoDto) {
   @ApiProperty({
     description: 'Valor do orçamento',
-    example: 1500.00,
-    required: false
+    example: 1500.0,
+    required: false,
   })
   @IsNumber()
   @IsOptional()
@@ -16,7 +16,7 @@ export class UpdateOrcamentoDto extends PartialType(CreateOrcamentoDto) {
   @ApiProperty({
     description: 'Data do orçamento',
     example: '2024-03-20',
-    required: false
+    required: false,
   })
   @IsDateString()
   @IsOptional()
@@ -25,7 +25,7 @@ export class UpdateOrcamentoDto extends PartialType(CreateOrcamentoDto) {
   @ApiProperty({
     description: 'Data de validade do orçamento',
     example: '2024-04-20',
-    required: false
+    required: false,
   })
   @IsDateString()
   @IsOptional()
@@ -34,7 +34,7 @@ export class UpdateOrcamentoDto extends PartialType(CreateOrcamentoDto) {
   @ApiProperty({
     description: 'ID do pacote',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: false
+    required: false,
   })
   @IsUUID()
   @IsOptional()
@@ -43,8 +43,8 @@ export class UpdateOrcamentoDto extends PartialType(CreateOrcamentoDto) {
   @ApiProperty({
     description: 'Caminho do arquivo PDF do orçamento',
     example: 'uploads/orcamentos/orcamento_123.pdf',
-    required: false
+    required: false,
   })
   @IsOptional()
   arquivo_orcamento?: string;
-} 
+}

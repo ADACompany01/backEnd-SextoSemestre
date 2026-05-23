@@ -9,4 +9,4 @@ export interface ClienteRepository {
   findByEmail(email: string): Promise<Cliente | null>;
   findByIdUsuario(id_usuario: string): Promise<Cliente | null>;
   // Adicione outros métodos conforme necessário
-} 
+}

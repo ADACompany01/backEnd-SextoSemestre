@@ -6,4 +6,4 @@ import { LighthouseController } from '../interfaces/http/controllers/lighthouse.
   controllers: [LighthouseController],
   providers: [LighthouseService],
 })
-export class LighthouseModule {} 
+export class LighthouseModule {}

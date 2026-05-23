@@ -5,7 +5,9 @@ export interface SolicitacaoRepository {
   findAll(): Promise<Solicitacao[]>;
   findById(id: string): Promise<Solicitacao | null>;
   findByCliente(id_cliente: string): Promise<Solicitacao[]>;
-  update(id: string, data: Partial<Solicitacao>): Promise<[number, Solicitacao[]]>;
+  update(
+    id: string,
+    data: Partial<Solicitacao>,
+  ): Promise<[number, Solicitacao[]]>;
   delete(id: string): Promise<number>;
 }
-

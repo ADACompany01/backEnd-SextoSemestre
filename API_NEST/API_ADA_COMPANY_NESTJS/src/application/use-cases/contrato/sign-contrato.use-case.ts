@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ContratoRepository } from '../../../infrastructure/database/repositories/contrato.repository';
 import { SignatureService } from '../../services/signature.service';
 import * as fs from 'fs';
@@ -24,22 +28,33 @@ export class SignContratoUseCase {
 
     // Validar assinatura
     if (!this.signatureService.validateSignatureBase64(signatureBase64)) {
-      throw new BadRequestException('Assinatura inválida. Forneça uma imagem em base64 válida.');
+      throw new BadRequestException(
+        'Assinatura inválida. Forneça uma imagem em base64 válida.',
+      );
     }
 
     // Determinar caminho do PDF original
     let pdfPath: string;
-    
+
     if (contractFilePath && fs.existsSync(contractFilePath)) {
       pdfPath = contractFilePath;
-    } else if ((contrato as any).arquivo_contrato && fs.existsSync((contrato as any).arquivo_contrato)) {
+    } else if (
+      (contrato as any).arquivo_contrato &&
+      fs.existsSync((contrato as any).arquivo_contrato)
+    ) {
       pdfPath = (contrato as any).arquivo_contrato;
     } else {
-      throw new BadRequestException('Arquivo do contrato não encontrado. Faça upload do contrato antes de assinar.');
+      throw new BadRequestException(
+        'Arquivo do contrato não encontrado. Faça upload do contrato antes de assinar.',
+      );
     }
 
     // Gerar caminho para o PDF assinado
-    const uploadsDir = path.join(process.cwd(), 'uploads', 'contratos-assinados');
+    const uploadsDir = path.join(
+      process.cwd(),
+      'uploads',
+      'contratos-assinados',
+    );
     const fileName = `contrato_${contratoId}_assinado_${Date.now()}.pdf`;
     const outputPath = path.join(uploadsDir, fileName);
 
@@ -63,4 +78,3 @@ export class SignContratoUseCase {
     };
   }
 }
-

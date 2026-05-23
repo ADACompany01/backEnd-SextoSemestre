@@ -23,9 +23,13 @@ export class UpdateContratoUseCase {
 
     // Se o código do orçamento for alterado, buscar o novo orçamento para obter o id_cliente
     if (data.cod_orcamento && data.cod_orcamento !== contrato.cod_orcamento) {
-      const orcamento = await this.orcamentoRepository.findById(data.cod_orcamento);
+      const orcamento = await this.orcamentoRepository.findById(
+        data.cod_orcamento,
+      );
       if (!orcamento) {
-        throw new NotFoundException(`Orçamento com código ${data.cod_orcamento} não encontrado`);
+        throw new NotFoundException(
+          `Orçamento com código ${data.cod_orcamento} não encontrado`,
+        );
       }
       // Obter o id_cliente do orçamento através do pacote (usando type assertion temporariamente)
       (updateData as any).id_cliente = (orcamento as any).pacote.id_cliente;
@@ -39,13 +43,18 @@ export class UpdateContratoUseCase {
       updateData.data_entrega = new Date(data.data_entrega);
     }
 
-    const [affectedCount] = await this.contratoRepository.update(id, updateData);
+    const [affectedCount] = await this.contratoRepository.update(
+      id,
+      updateData,
+    );
 
     if (affectedCount === 0) {
-         throw new NotFoundException(`Contrato com ID ${id} não encontrado para atualização`);
+      throw new NotFoundException(
+        `Contrato com ID ${id} não encontrado para atualização`,
+      );
     }
 
     // Retornar o contrato atualizado
     return this.contratoRepository.findById(id);
   }
-} 
+}

@@ -7,4 +7,4 @@ export class ListContratosUseCase {
   async execute(): Promise<Contrato[]> {
     return this.contratoRepository.findAll();
   }
-} 
+}

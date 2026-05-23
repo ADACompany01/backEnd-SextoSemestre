@@ -14,5 +14,3 @@ export class MarcarNotificacaoLidaUseCase {
     return await this.notificacaoRepository.marcarTodasComoLidas(userId);
   }
 }
-
-

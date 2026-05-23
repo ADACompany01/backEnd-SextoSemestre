@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateFuncionarioDto {
   @ApiProperty({
     description: 'Nome completo do funcionário',
-    example: 'Pedro Silva'
+    example: 'Pedro Silva',
   })
   @IsString({ message: 'O nome completo é obrigatório.' })
   @IsNotEmpty({ message: 'O nome completo é obrigatório.' })
@@ -12,7 +12,7 @@ export class CreateFuncionarioDto {
 
   @ApiProperty({
     description: 'Email do funcionário',
-    example: 'pedro.silva@adacompany.com'
+    example: 'pedro.silva@adacompany.com',
   })
   @IsEmail({}, { message: 'O email informado é inválido.' })
   @IsNotEmpty({ message: 'O email é obrigatório.' })
@@ -20,7 +20,7 @@ export class CreateFuncionarioDto {
 
   @ApiProperty({
     description: 'Telefone do funcionário',
-    example: '(11) 97777-7777'
+    example: '(11) 97777-7777',
   })
   @IsString({ message: 'O telefone é obrigatório.' })
   @IsNotEmpty({ message: 'O telefone é obrigatório.' })
@@ -28,10 +28,10 @@ export class CreateFuncionarioDto {
 
   @ApiProperty({
     description: 'Senha do usuário',
-    example: 'senha123'
+    example: 'senha123',
   })
   @IsString({ message: 'A senha é obrigatória.' })
   @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres.' })
   @IsNotEmpty({ message: 'A senha é obrigatória.' })
   senha: string;
-} 
+}

@@ -11,7 +11,10 @@ export class UpdateSolicitacaoUseCase {
     private readonly solicitacaoRepository: SolicitacaoRepository,
   ) {}
 
-  async execute(id: string, updateData: UpdateSolicitacaoDto): Promise<SolicitacaoModel> {
+  async execute(
+    id: string,
+    updateData: UpdateSolicitacaoDto,
+  ): Promise<SolicitacaoModel> {
     // Verificar se a solicitação existe
     const solicitacao = await this.solicitacaoRepository.findById(id);
     if (!solicitacao) {
@@ -19,14 +22,16 @@ export class UpdateSolicitacaoUseCase {
     }
 
     // Atualizar a solicitação
-    const [affectedCount, affectedRows] = await this.solicitacaoRepository.update(id, updateData);
+    const [affectedCount, affectedRows] =
+      await this.solicitacaoRepository.update(id, updateData);
 
     if (affectedCount === 0) {
-      throw new NotFoundException(`Solicitação com ID ${id} não encontrada para atualização`);
+      throw new NotFoundException(
+        `Solicitação com ID ${id} não encontrada para atualização`,
+      );
     }
 
     // Retornar a solicitação atualizada
     return affectedRows[0];
   }
 }
-

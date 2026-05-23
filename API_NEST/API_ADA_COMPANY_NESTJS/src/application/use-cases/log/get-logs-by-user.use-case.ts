@@ -9,10 +9,18 @@ export class GetLogsByUserUseCase {
     private readonly logRepository: LogRepositoryInterface,
   ) {}
 
-  async execute(userId: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async execute(
+    userId: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    return await this.logRepository.findByUserId(userId, limit, lastEvaluatedKey);
+    return await this.logRepository.findByUserId(
+      userId,
+      limit,
+      lastEvaluatedKey,
+    );
   }
 }

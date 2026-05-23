@@ -6,4 +6,4 @@ export class DeleteContratoUseCase {
   async execute(id: string): Promise<void> {
     await this.contratoRepository.delete(id);
   }
-} 
+}

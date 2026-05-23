@@ -5,7 +5,7 @@ export class UpdateFuncionarioDto {
   @ApiProperty({
     description: 'Nome completo do funcionário',
     example: 'Pedro Silva',
-    required: false
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -14,7 +14,7 @@ export class UpdateFuncionarioDto {
   @ApiProperty({
     description: 'Email do funcionário',
     example: 'pedro.silva@adacompany.com',
-    required: false
+    required: false,
   })
   @IsEmail()
   @IsOptional()
@@ -23,7 +23,7 @@ export class UpdateFuncionarioDto {
   @ApiProperty({
     description: 'Telefone do funcionário',
     example: '(11) 97777-7777',
-    required: false
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -32,9 +32,9 @@ export class UpdateFuncionarioDto {
   @ApiProperty({
     description: 'ID do usuário associado',
     example: '123e4567-e89b-12d3-a456-426614174000',
-    required: false
+    required: false,
   })
   @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido.' })
   @IsOptional()
   id_usuario?: string;
-} 
+}

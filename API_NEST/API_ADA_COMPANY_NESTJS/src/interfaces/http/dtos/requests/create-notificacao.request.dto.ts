@@ -10,7 +10,10 @@ export class CreateNotificacaoRequestDto {
   @IsString()
   mensagem: string;
 
-  @ApiProperty({ enum: ['info', 'sucesso', 'aviso', 'erro'], description: 'Tipo da notificação' })
+  @ApiProperty({
+    enum: ['info', 'sucesso', 'aviso', 'erro'],
+    description: 'Tipo da notificação',
+  })
   @IsEnum(['info', 'sucesso', 'aviso', 'erro'])
   tipo: 'info' | 'sucesso' | 'aviso' | 'erro';
 
@@ -23,5 +26,3 @@ export class CreateNotificacaoRequestDto {
   @IsObject()
   metadata?: Record<string, any>;
 }
-
-

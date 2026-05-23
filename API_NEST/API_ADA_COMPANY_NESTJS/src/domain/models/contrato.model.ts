@@ -5,4 +5,4 @@ export class Contrato {
   status_contrato: string;
   data_inicio: Date;
   data_entrega: Date;
-} 
+}

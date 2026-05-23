@@ -4,4 +4,4 @@ export class Orcamento {
   data_orcamento: Date;
   data_validade: Date;
   id_pacote: string;
-} 
+}

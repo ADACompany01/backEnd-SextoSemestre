@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongoDBModule } from '../infrastructure/database/mongodb.module';
-import { Notificacao, NotificacaoSchema } from '../infrastructure/database/schemas/notificacao.schema';
+import {
+  Notificacao,
+  NotificacaoSchema,
+} from '../infrastructure/database/schemas/notificacao.schema';
 import { NotificacaoRepository } from '../infrastructure/database/repositories/notificacao.repository';
 import { NotificacaoController } from '../interfaces/http/controllers/notificacao.controller';
 import { CreateNotificacaoUseCase } from '../application/use-cases/notificacao/create-notificacao.use-case';
@@ -30,5 +33,3 @@ import { MarcarNotificacaoLidaUseCase } from '../application/use-cases/notificac
   ],
 })
 export class NotificacaoModule {}
-
-

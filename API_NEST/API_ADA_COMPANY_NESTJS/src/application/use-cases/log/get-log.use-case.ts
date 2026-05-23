@@ -11,9 +11,11 @@ export class GetLogUseCase {
 
   async execute(id: string, timestamp: string): Promise<LogModel> {
     const log = await this.logRepository.findById(id, timestamp);
-    
+
     if (!log) {
-      throw new NotFoundException(`Log com ID ${id} e timestamp ${timestamp} não encontrado`);
+      throw new NotFoundException(
+        `Log com ID ${id} e timestamp ${timestamp} não encontrado`,
+      );
     }
 
     return log;

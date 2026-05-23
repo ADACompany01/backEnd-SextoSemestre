@@ -12,4 +12,4 @@ export class GetClienteUseCase {
   async execute(id: string): Promise<Cliente | null> {
     return this.clienteRepository.findById(id);
   }
-} 
+}

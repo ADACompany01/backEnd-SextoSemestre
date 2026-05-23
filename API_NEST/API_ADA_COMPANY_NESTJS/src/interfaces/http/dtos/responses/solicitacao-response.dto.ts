@@ -20,7 +20,12 @@ export class SolicitacaoResponseDto {
   selected_issues?: any;
 
   @ApiProperty()
-  status: 'PENDENTE' | 'EM_ANALISE' | 'ORCAMENTO_CRIADO' | 'ORCAMENTO_APROVADO' | 'CANCELADA';
+  status:
+    | 'PENDENTE'
+    | 'EM_ANALISE'
+    | 'ORCAMENTO_CRIADO'
+    | 'ORCAMENTO_APROVADO'
+    | 'CANCELADA';
 
   @ApiProperty({ required: false })
   id_pacote?: string;
@@ -41,4 +46,3 @@ export class SolicitacaoResponseDto {
     email: string;
   };
 }
-

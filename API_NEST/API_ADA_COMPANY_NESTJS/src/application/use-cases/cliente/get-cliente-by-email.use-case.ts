@@ -6,7 +6,7 @@ import { CLIENTE_REPOSITORY } from '../../../infrastructure/providers/cliente.pr
 export class GetClienteByEmailUseCase {
   constructor(
     @Inject(CLIENTE_REPOSITORY)
-    private readonly clienteRepository: ClienteRepository
+    private readonly clienteRepository: ClienteRepository,
   ) {}
 
   async execute(email: string): Promise<ClienteModel | null> {
@@ -14,4 +14,4 @@ export class GetClienteByEmailUseCase {
     // Se não tiver, precisaremos adicioná-lo à interface e implementação do repositório.
     return this.clienteRepository.findByEmail(email);
   }
-} 
+}

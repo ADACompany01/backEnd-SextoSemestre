@@ -1,4 +1,8 @@
-import { Injectable, Inject, LoggerService as NestLoggerService } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  LoggerService as NestLoggerService,
+} from '@nestjs/common';
 import { CreateLogUseCase } from '../use-cases/log/create-log.use-case';
 import { LogLevel } from '../../domain/models/log.model';
 
@@ -9,7 +13,12 @@ export class LoggingService implements NestLoggerService {
     private readonly createLogUseCase: CreateLogUseCase,
   ) {}
 
-  async log(level: LogLevel, message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async log(
+    level: LogLevel,
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     try {
       await this.createLogUseCase.execute({
         level,
@@ -21,27 +30,50 @@ export class LoggingService implements NestLoggerService {
     } catch (error) {
       // Fallback para console se o DynamoDB não estiver disponível
       console.error('Erro ao salvar log no DynamoDB:', error);
-      console.log(`[${level.toUpperCase()}] ${context ? `[${context}] ` : ''}${message}`, metadata);
+      console.log(
+        `[${level.toUpperCase()}] ${context ? `[${context}] ` : ''}${message}`,
+        metadata,
+      );
     }
   }
 
-  async error(message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async error(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.log(LogLevel.ERROR, message, context, metadata);
   }
 
-  async warn(message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async warn(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.log(LogLevel.WARN, message, context, metadata);
   }
 
-  async info(message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async info(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.log(LogLevel.INFO, message, context, metadata);
   }
 
-  async debug(message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async debug(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.log(LogLevel.DEBUG, message, context, metadata);
   }
 
-  async verbose(message: string, context?: string, metadata?: Record<string, any>): Promise<void> {
+  async verbose(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
     await this.log(LogLevel.VERBOSE, message, context, metadata);
   }
 
@@ -57,9 +89,12 @@ export class LoggingService implements NestLoggerService {
     userAgent?: string,
     metadata?: Record<string, any>,
   ): Promise<void> {
-    const level = statusCode >= 500 ? LogLevel.ERROR : 
-                  statusCode >= 400 ? LogLevel.WARN : 
-                  LogLevel.INFO;
+    const level =
+      statusCode >= 500
+        ? LogLevel.ERROR
+        : statusCode >= 400
+          ? LogLevel.WARN
+          : LogLevel.INFO;
 
     await this.createLogUseCase.execute({
       level,

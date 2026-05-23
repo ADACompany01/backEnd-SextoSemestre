@@ -4,7 +4,10 @@ import { Cliente } from '../infrastructure/database/entities/cliente.entity';
 import { Usuario } from '../infrastructure/database/entities/usuario.entity';
 import { Funcionario } from '../infrastructure/database/entities/funcionario.entity';
 import { ClienteController } from '../interfaces/http/controllers/cliente.controller';
-import { ClienteRepositoryProvider, CLIENTE_REPOSITORY } from '../infrastructure/providers/cliente.provider';
+import {
+  ClienteRepositoryProvider,
+  CLIENTE_REPOSITORY,
+} from '../infrastructure/providers/cliente.provider';
 import { CreateClienteUseCase } from '../application/use-cases/cliente/create-cliente.use-case';
 import { ListClientesUseCase } from '../application/use-cases/cliente/list-clientes.use-case';
 import { GetClienteUseCase } from '../application/use-cases/cliente/get-cliente.use-case';
@@ -26,7 +29,8 @@ import { UsuarioRepository } from '../infrastructure/database/repositories/usuar
     ClienteRepositoryProvider,
     {
       provide: CreateClienteUseCase,
-      useFactory: (clienteRepo, usuarioRepo) => new CreateClienteUseCase(clienteRepo, usuarioRepo),
+      useFactory: (clienteRepo, usuarioRepo) =>
+        new CreateClienteUseCase(clienteRepo, usuarioRepo),
       inject: [CLIENTE_REPOSITORY, UsuarioRepository],
     },
     {
@@ -63,6 +67,6 @@ import { UsuarioRepository } from '../infrastructure/database/repositories/usuar
     UpdateClienteUseCase,
     DeleteClienteUseCase,
     CLIENTE_REPOSITORY,
-  ]
+  ],
 })
 export class ClienteModule {}

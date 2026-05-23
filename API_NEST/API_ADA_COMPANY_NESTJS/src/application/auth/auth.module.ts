@@ -10,8 +10,14 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { FuncionarioGuard } from '../../interfaces/http/guards/funcionario.guard';
 import { SelfAccessGuard } from '../../interfaces/http/guards/self-access.guard';
-import { FuncionarioRepositoryProvider, FUNCIONARIO_REPOSITORY } from '../../infrastructure/providers/funcionario.provider';
-import { ClienteRepositoryProvider, CLIENTE_REPOSITORY } from '../../infrastructure/providers/cliente.provider';
+import {
+  FuncionarioRepositoryProvider,
+  FUNCIONARIO_REPOSITORY,
+} from '../../infrastructure/providers/funcionario.provider';
+import {
+  ClienteRepositoryProvider,
+  CLIENTE_REPOSITORY,
+} from '../../infrastructure/providers/cliente.provider';
 import { UsuarioRepository } from '../../infrastructure/database/repositories/usuario.repository';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Usuario } from '../../infrastructure/database/entities/usuario.entity';
@@ -68,4 +74,4 @@ import { LogModule } from '../../modules/log.module';
     UsuarioRepository,
   ],
 })
-export class AuthModule {} 
+export class AuthModule {}

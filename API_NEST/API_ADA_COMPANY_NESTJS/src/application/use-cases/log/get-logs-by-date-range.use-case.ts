@@ -9,10 +9,20 @@ export class GetLogsByDateRangeUseCase {
     private readonly logRepository: LogRepositoryInterface,
   ) {}
 
-  async execute(startDate: string, endDate: string, limit?: number, lastEvaluatedKey?: Record<string, any>): Promise<{
+  async execute(
+    startDate: string,
+    endDate: string,
+    limit?: number,
+    lastEvaluatedKey?: Record<string, any>,
+  ): Promise<{
     logs: LogModel[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    return await this.logRepository.findByDateRange(startDate, endDate, limit, lastEvaluatedKey);
+    return await this.logRepository.findByDateRange(
+      startDate,
+      endDate,
+      limit,
+      lastEvaluatedKey,
+    );
   }
 }

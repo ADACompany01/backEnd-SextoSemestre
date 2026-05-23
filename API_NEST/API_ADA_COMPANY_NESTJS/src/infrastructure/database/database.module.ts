@@ -26,14 +26,26 @@ import { UsuarioRepository } from './repositories/usuario.repository';
         models: [Usuario, Cliente, Funcionario, Orcamento, Contrato, Pacote],
       }),
     }),
-    SequelizeModule.forFeature([Usuario, Cliente, Funcionario, Orcamento, Contrato, Pacote]),
+    SequelizeModule.forFeature([
+      Usuario,
+      Cliente,
+      Funcionario,
+      Orcamento,
+      Contrato,
+      Pacote,
+    ]),
   ],
-  providers: [
-    UsuarioRepository,
-  ],
+  providers: [UsuarioRepository],
   exports: [
     UsuarioRepository,
-    SequelizeModule.forFeature([Usuario, Cliente, Funcionario, Orcamento, Contrato, Pacote])
-  ]
+    SequelizeModule.forFeature([
+      Usuario,
+      Cliente,
+      Funcionario,
+      Orcamento,
+      Contrato,
+      Pacote,
+    ]),
+  ],
 })
-export class DatabaseModule {} 
+export class DatabaseModule {}

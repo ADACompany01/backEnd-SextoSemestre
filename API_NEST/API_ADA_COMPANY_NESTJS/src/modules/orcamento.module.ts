@@ -5,7 +5,10 @@ import { OrcamentoController } from '../interfaces/http/controllers/orcamento.co
 import { ClienteModule } from './cliente.module';
 import { PacoteModule } from './pacote.module';
 import { FuncionarioModule } from '../modules/funcionario.module';
-import { OrcamentoRepositoryProvider, ORCAMENTO_REPOSITORY } from '../infrastructure/providers/orcamento.provider';
+import {
+  OrcamentoRepositoryProvider,
+  ORCAMENTO_REPOSITORY,
+} from '../infrastructure/providers/orcamento.provider';
 import { CreateOrcamentoUseCase } from '../application/use-cases/orcamento/create-orcamento.use-case';
 import { ListOrcamentosUseCase } from '../application/use-cases/orcamento/list-orcamentos.use-case';
 import { GetOrcamentoUseCase } from '../application/use-cases/orcamento/get-orcamento.use-case';
@@ -26,7 +29,8 @@ import { FileUploadService } from '../application/services/file-upload.service';
     FileUploadService,
     {
       provide: CreateOrcamentoUseCase,
-      useFactory: (repo, pacoteRepo) => new CreateOrcamentoUseCase(repo, pacoteRepo),
+      useFactory: (repo, pacoteRepo) =>
+        new CreateOrcamentoUseCase(repo, pacoteRepo),
       inject: [ORCAMENTO_REPOSITORY, 'PACOTE_REPOSITORY'],
     },
     {
@@ -56,7 +60,7 @@ import { FileUploadService } from '../application/services/file-upload.service';
     GetOrcamentoUseCase,
     UpdateOrcamentoUseCase,
     DeleteOrcamentoUseCase,
-    ORCAMENTO_REPOSITORY
-  ]
+    ORCAMENTO_REPOSITORY,
+  ],
 })
 export class OrcamentoModule {}

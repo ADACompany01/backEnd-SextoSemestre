@@ -1,4 +1,12 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasOne } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  HasOne,
+} from 'sequelize-typescript';
 import { Cliente } from './cliente.entity';
 import { Orcamento } from './orcamento.entity';
 // import { Orcamento } from './orcamento.entity'; // Será criado depois
@@ -6,7 +14,7 @@ import { Orcamento } from './orcamento.entity';
 export enum TipoPacote {
   A = 'A',
   AA = 'AA',
-  AAA = 'AAA'
+  AAA = 'AAA',
 }
 
 @Table({ tableName: 'pacotes' })
@@ -38,7 +46,7 @@ export class Pacote extends Model<Pacote> {
   tipo_pacote: string;
 
   @Column({
-    type: DataType.DECIMAL(10,2),
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
     field: 'valor_base',
   })
@@ -46,4 +54,4 @@ export class Pacote extends Model<Pacote> {
 
   @HasOne(() => Orcamento)
   orcamento: Orcamento;
-} 
+}

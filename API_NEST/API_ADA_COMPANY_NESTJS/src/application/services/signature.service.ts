@@ -126,4 +126,3 @@ export class SignatureService {
     return base64Regex.test(signatureBase64);
   }
 }
-

@@ -3,7 +3,10 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { Funcionario } from '../infrastructure/database/entities/funcionario.entity';
 import { Usuario } from '../infrastructure/database/entities/usuario.entity';
 import { FuncionarioController } from '../interfaces/http/controllers/funcionario.controller';
-import { FuncionarioRepositoryProvider, FUNCIONARIO_REPOSITORY } from '../infrastructure/providers/funcionario.provider';
+import {
+  FuncionarioRepositoryProvider,
+  FUNCIONARIO_REPOSITORY,
+} from '../infrastructure/providers/funcionario.provider';
 import { CreateFuncionarioUseCase } from '../application/use-cases/funcionario/create-funcionario.use-case';
 import { ListFuncionariosUseCase } from '../application/use-cases/funcionario/list-funcionarios.use-case';
 import { GetFuncionarioUseCase } from '../application/use-cases/funcionario/get-funcionario.use-case';
@@ -14,17 +17,15 @@ import { UsuarioRepository } from '../infrastructure/database/repositories/usuar
 import { ClienteModule } from '../modules/cliente.module';
 
 @Module({
-  imports: [
-    SequelizeModule.forFeature([Funcionario, Usuario]),
-    ClienteModule,
-  ],
+  imports: [SequelizeModule.forFeature([Funcionario, Usuario]), ClienteModule],
   controllers: [FuncionarioController],
   providers: [
     FuncionarioRepositoryProvider,
     UsuarioRepository,
     {
       provide: CreateFuncionarioUseCase,
-      useFactory: (funcionarioRepo, usuarioRepo) => new CreateFuncionarioUseCase(funcionarioRepo, usuarioRepo),
+      useFactory: (funcionarioRepo, usuarioRepo) =>
+        new CreateFuncionarioUseCase(funcionarioRepo, usuarioRepo),
       inject: [FUNCIONARIO_REPOSITORY, UsuarioRepository],
     },
     {
@@ -62,7 +63,7 @@ import { ClienteModule } from '../modules/cliente.module';
     DeleteFuncionarioUseCase,
     FUNCIONARIO_REPOSITORY,
     UsuarioRepository,
-    FuncionarioRepositoryProvider
-  ]
+    FuncionarioRepositoryProvider,
+  ],
 })
 export class FuncionarioModule {}

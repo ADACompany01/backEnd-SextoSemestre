@@ -13,7 +13,8 @@ import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
           region: configService.get<string>('AWS_REGION') || 'us-east-1',
           credentials: {
             accessKeyId: configService.get<string>('AWS_ACCESS_KEY_ID') || '',
-            secretAccessKey: configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
+            secretAccessKey:
+              configService.get<string>('AWS_SECRET_ACCESS_KEY') || '',
           },
         });
 

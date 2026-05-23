@@ -42,24 +42,32 @@ async function bootstrap() {
       if (!origin) {
         return callback(null, true);
       }
-      
+
       // Verificar se a origem está na lista permitida
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      
+
       // Em desenvolvimento, ser mais permissivo
       if (isDevelopment) {
-        console.warn(`⚠️  CORS: Origem não autorizada em desenvolvimento: ${origin}`);
+        console.warn(
+          `⚠️  CORS: Origem não autorizada em desenvolvimento: ${origin}`,
+        );
         return callback(null, true); // Permitir em desenvolvimento
       }
-      
+
       // Em produção, bloquear origens não autorizadas
       console.error(`❌ CORS: Origem bloqueada: ${origin}`);
       return callback(new Error('Não permitido pelo CORS'));
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+    ],
     exposedHeaders: ['Authorization'],
     credentials: true,
     preflightContinue: false,
@@ -69,17 +77,19 @@ async function bootstrap() {
 
   // Configuração do Helmet para headers de segurança HTTP
   // CSP desabilitado para não interferir com CORS - pode ser reativado depois com configuração adequada
-  app.use(helmet({
-    contentSecurityPolicy: false, // Desabilitado para não bloquear CORS - pode ser reconfigurado depois
-    crossOriginEmbedderPolicy: false, // Permite carregar recursos externos quando necessário
-    crossOriginResourcePolicy: { policy: "cross-origin" }, // Permite recursos cross-origin
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true,
-    },
-  }));
-  
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // Desabilitado para não bloquear CORS - pode ser reconfigurado depois
+      crossOriginEmbedderPolicy: false, // Permite carregar recursos externos quando necessário
+      crossOriginResourcePolicy: { policy: 'cross-origin' }, // Permite recursos cross-origin
+      hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true,
+      },
+    }),
+  );
+
   // Configurar limite de tamanho para uploads (50MB)
   app.use(require('express').json({ limit: '50mb' }));
   app.use(require('express').urlencoded({ limit: '50mb', extended: true }));
@@ -92,17 +102,19 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Adicionar ValidationPipe global
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // Adicionar interceptors e filtros globais para logging
   // TEMPORARIAMENTE DESABILITADO - LoggingInterceptor precisa ser configurado como provider
   // app.useGlobalInterceptors(app.get(LoggingInterceptor));
   // app.useGlobalFilters(app.get(LoggingExceptionFilter));
-  
+
   // Configuração do Swagger - apenas em ambiente de desenvolvimento
   // IMPORTANTE: O Swagger deve ser configurado DEPOIS do setGlobalPrefix para incluir o prefixo
   if (isDevelopment) {
@@ -110,7 +122,9 @@ async function bootstrap() {
 
     const config = new DocumentBuilder()
       .setTitle('API ADA Company - Mobile Backend')
-      .setDescription('API para gerenciamento de serviços da ADA Company (Backend Mobile - Porta 3001)\n\n**IMPORTANTE:** Todas as rotas têm o prefixo `/api`. Exemplo: `/api/funcionarios`')
+      .setDescription(
+        'API para gerenciamento de serviços da ADA Company (Backend Mobile - Porta 3001)\n\n**IMPORTANTE:** Todas as rotas têm o prefixo `/api`. Exemplo: `/api/funcionarios`',
+      )
       .setVersion('1.0')
       .addServer(localServerUrl, 'Local')
       .addServer('https://adacompany.duckdns.org/api', 'Produção')
@@ -133,12 +147,13 @@ async function bootstrap() {
         in: 'header',
       })
       .build();
-      
-      const document = SwaggerModule.createDocument(app, config, {
-        operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
-        ignoreGlobalPrefix: true, // CRÍTICO: false para incluir o prefixo /api nas rotas
-      });
-    
+
+    const document = SwaggerModule.createDocument(app, config, {
+      operationIdFactory: (controllerKey: string, methodKey: string) =>
+        methodKey,
+      ignoreGlobalPrefix: true, // CRÍTICO: false para incluir o prefixo /api nas rotas
+    });
+
     // Swagger será acessível em /api (documentação) e as rotas já incluirão /api automaticamente
     SwaggerModule.setup('api', app, document, {
       swaggerOptions: {
@@ -148,17 +163,23 @@ async function bootstrap() {
       },
       customSiteTitle: 'API ADA Company - Documentação',
     });
-    console.log(`⚠️  Swagger disponível apenas em desenvolvimento: http://localhost:${port}/api`);
+    console.log(
+      `⚠️  Swagger disponível apenas em desenvolvimento: http://localhost:${port}/api`,
+    );
   } else {
     console.log('🔒 Swagger desabilitado em produção por segurança');
   }
-  
-  await app.listen(port, '0.0.0.0');  // Escuta em todas as interfaces de rede
-  
+
+  await app.listen(port, '0.0.0.0'); // Escuta em todas as interfaces de rede
+
   console.log(`✅ Aplicação rodando na porta ${port}`);
   if (isDevelopment) {
-    console.log(`📚 Documentação Swagger disponível em: http://localhost:${port}/api`);
-    console.log(`🌐 Acessível via rede local em: http://192.168.1.7:${port}/api`);
+    console.log(
+      `📚 Documentação Swagger disponível em: http://localhost:${port}/api`,
+    );
+    console.log(
+      `🌐 Acessível via rede local em: http://192.168.1.7:${port}/api`,
+    );
   } else {
     console.log(`🔒 Modo produção: Swagger desabilitado`);
   }

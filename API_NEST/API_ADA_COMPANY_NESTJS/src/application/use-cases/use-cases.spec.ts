@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, HttpException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateClienteUseCase } from './cliente/create-cliente.use-case';
 import { DeleteClienteUseCase } from './cliente/delete-cliente.use-case';
 import { GetClienteByEmailUseCase } from './cliente/get-cliente-by-email.use-case';
@@ -96,45 +101,66 @@ describe('use cases simples', () => {
     [GetSolicitacoesByClienteUseCase, 'findByCliente', ['cliente-1']],
     [ListSolicitacoesUseCase, 'findAll', []],
   ])('%p delega para %s', async (UseCase: any, method: string, args: any[]) => {
-    const repository = repo({ [method]: jest.fn().mockResolvedValue('resultado') });
-    await expect(new UseCase(repository).execute(...args)).resolves.toBe('resultado');
+    const repository = repo({
+      [method]: jest.fn().mockResolvedValue('resultado'),
+    });
+    await expect(new UseCase(repository).execute(...args)).resolves.toBe(
+      'resultado',
+    );
     expect(repository[method]).toHaveBeenCalledWith(...args);
   });
 
-  it.each([
-    [DeleteContratoUseCase],
-    [DeleteOrcamentoUseCase],
-  ])('%p delega exclusao direta', async (UseCase: any) => {
-    const repository = repo({ delete: jest.fn().mockResolvedValue(1) });
-    await expect(new UseCase(repository).execute('id-1')).resolves.toBeUndefined();
-    expect(repository.delete).toHaveBeenCalledWith('id-1');
-  });
+  it.each([[DeleteContratoUseCase], [DeleteOrcamentoUseCase]])(
+    '%p delega exclusao direta',
+    async (UseCase: any) => {
+      const repository = repo({ delete: jest.fn().mockResolvedValue(1) });
+      await expect(
+        new UseCase(repository).execute('id-1'),
+      ).resolves.toBeUndefined();
+      expect(repository.delete).toHaveBeenCalledWith('id-1');
+    },
+  );
 
   it('DeletePacoteUseCase retorna o resultado do repository', async () => {
     const repository = repo({ delete: jest.fn().mockResolvedValue(1) });
-    await expect(new DeletePacoteUseCase(repository as any).execute('id-1')).resolves.toBe(1);
+    await expect(
+      new DeletePacoteUseCase(repository as any).execute('id-1'),
+    ).resolves.toBe(1);
     expect(repository.delete).toHaveBeenCalledWith('id-1');
   });
 
-  it.each([
-    [UpdateOrcamentoUseCase],
-  ])('%p delega update direto', async (UseCase: any) => {
-    const repository = repo({ update: jest.fn().mockResolvedValue(['ok']) });
-    await expect(new UseCase(repository).execute('id-1', { status: 'OK' })).resolves.toEqual(['ok']);
-    expect(repository.update).toHaveBeenCalledWith('id-1', { status: 'OK' });
-  });
+  it.each([[UpdateOrcamentoUseCase]])(
+    '%p delega update direto',
+    async (UseCase: any) => {
+      const repository = repo({ update: jest.fn().mockResolvedValue(['ok']) });
+      await expect(
+        new UseCase(repository).execute('id-1', { status: 'OK' }),
+      ).resolves.toEqual(['ok']);
+      expect(repository.update).toHaveBeenCalledWith('id-1', { status: 'OK' });
+    },
+  );
 
   it('UpdatePacoteUseCase atualiza e retorna busca final', async () => {
     const repository = repo({
       update: jest.fn().mockResolvedValue(undefined),
-      findById: jest.fn().mockResolvedValue({ id_pacote: 'id-1', status: 'OK' }),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_pacote: 'id-1', status: 'OK' }),
     });
-    await expect(new UpdatePacoteUseCase(repository as any).execute('id-1', { status: 'OK' } as any)).resolves.toEqual({ id_pacote: 'id-1', status: 'OK' });
+    await expect(
+      new UpdatePacoteUseCase(repository as any).execute('id-1', {
+        status: 'OK',
+      } as any),
+    ).resolves.toEqual({ id_pacote: 'id-1', status: 'OK' });
     expect(repository.update).toHaveBeenCalledWith('id-1', { status: 'OK' });
   });
 
   it('GetLogUseCase falha quando log nao existe', async () => {
-    await expect(new GetLogUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute('id', 'ts')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new GetLogUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute('id', 'ts'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
 
@@ -158,54 +184,114 @@ describe('cliente', () => {
       create: jest.fn().mockResolvedValue({ id_usuario: 'user-1' }),
     });
 
-    await expect(new CreateClienteUseCase(clienteRepository as any, usuarioRepository as any).execute(dto)).resolves.toBe(cliente);
-    expect(usuarioRepository.create).toHaveBeenCalledWith(expect.objectContaining({ senha: 'senha-hash', tipo_usuario: 'cliente' }));
-    expect(clienteRepository.create).toHaveBeenCalledWith(expect.objectContaining({ id_usuario: 'user-1' }));
+    await expect(
+      new CreateClienteUseCase(
+        clienteRepository as any,
+        usuarioRepository as any,
+      ).execute(dto),
+    ).resolves.toBe(cliente);
+    expect(usuarioRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ senha: 'senha-hash', tipo_usuario: 'cliente' }),
+    );
+    expect(clienteRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id_usuario: 'user-1' }),
+    );
   });
 
   it('bloqueia email ja cadastrado', async () => {
-    const useCase = new CreateClienteUseCase(repo() as any, repo({ findByEmail: jest.fn().mockResolvedValue({}) }) as any);
+    const useCase = new CreateClienteUseCase(
+      repo() as any,
+      repo({ findByEmail: jest.fn().mockResolvedValue({}) }) as any,
+    );
     await expect(useCase.execute(dto)).rejects.toBeInstanceOf(HttpException);
   });
 
   it('transforma erro inesperado em HttpException', async () => {
-    const useCase = new CreateClienteUseCase(repo() as any, repo({ findByEmail: jest.fn().mockRejectedValue(new Error('db off')) }) as any);
+    const useCase = new CreateClienteUseCase(
+      repo() as any,
+      repo({
+        findByEmail: jest.fn().mockRejectedValue(new Error('db off')),
+      }) as any,
+    );
     await expect(useCase.execute(dto)).rejects.toMatchObject({ status: 500 });
   });
 
   it('atualiza cliente existente e retorna registro atualizado', async () => {
     const repository = repo({
-      findById: jest.fn().mockResolvedValueOnce({ id_cliente: '1' }).mockResolvedValueOnce({ id_cliente: '1', nome_completo: 'Novo' }),
+      findById: jest
+        .fn()
+        .mockResolvedValueOnce({ id_cliente: '1' })
+        .mockResolvedValueOnce({ id_cliente: '1', nome_completo: 'Novo' }),
       update: jest.fn().mockResolvedValue(undefined),
     });
-    await expect(new UpdateClienteUseCase(repository as any).execute('1', { nome_completo: 'Novo' } as any)).resolves.toMatchObject({ nome_completo: 'Novo' });
-    expect(repository.update).toHaveBeenCalledWith('1', { nome_completo: 'Novo' });
+    await expect(
+      new UpdateClienteUseCase(repository as any).execute('1', {
+        nome_completo: 'Novo',
+      } as any),
+    ).resolves.toMatchObject({ nome_completo: 'Novo' });
+    expect(repository.update).toHaveBeenCalledWith('1', {
+      nome_completo: 'Novo',
+    });
   });
 
   it('falha ao atualizar cliente inexistente', async () => {
-    await expect(new UpdateClienteUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute('1', {} as any)).rejects.toBeInstanceOf(HttpException);
+    await expect(
+      new UpdateClienteUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute('1', {} as any),
+    ).rejects.toBeInstanceOf(HttpException);
   });
 
   it('remove cliente existente', async () => {
-    const repository = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: '1' }), delete: jest.fn().mockResolvedValue(undefined) });
-    await expect(new DeleteClienteUseCase(repository).execute('1')).resolves.toBeUndefined();
+    const repository = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: '1' }),
+      delete: jest.fn().mockResolvedValue(undefined),
+    });
+    await expect(
+      new DeleteClienteUseCase(repository).execute('1'),
+    ).resolves.toBeUndefined();
     expect(repository.delete).toHaveBeenCalledWith('1');
   });
 
   it('falha ao remover cliente inexistente', async () => {
-    await expect(new DeleteClienteUseCase(repo({ findById: jest.fn().mockResolvedValue(null) })).execute('1')).rejects.toBeInstanceOf(HttpException);
+    await expect(
+      new DeleteClienteUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }),
+      ).execute('1'),
+    ).rejects.toBeInstanceOf(HttpException);
   });
 });
 
 describe('funcionario', () => {
   it('cria usuario funcionario e remove senha do payload do funcionario', async () => {
-    const funcionarioRepository = repo({ create: jest.fn().mockResolvedValue({ id_funcionario: 'func-1' }) });
-    const usuarioRepository = repo({ create: jest.fn().mockResolvedValue({ id_usuario: 'user-1' }) });
-    const dto: any = { nome_completo: 'Joao', email: 'joao@email.com', telefone: '11', senha: '123' };
+    const funcionarioRepository = repo({
+      create: jest.fn().mockResolvedValue({ id_funcionario: 'func-1' }),
+    });
+    const usuarioRepository = repo({
+      create: jest.fn().mockResolvedValue({ id_usuario: 'user-1' }),
+    });
+    const dto: any = {
+      nome_completo: 'Joao',
+      email: 'joao@email.com',
+      telefone: '11',
+      senha: '123',
+    };
 
-    await expect(new CreateFuncionarioUseCase(funcionarioRepository as any, usuarioRepository as any).execute(dto)).resolves.toEqual({ id_funcionario: 'func-1' });
-    expect(usuarioRepository.create).toHaveBeenCalledWith(expect.objectContaining({ senha: 'senha-hash', tipo_usuario: 'funcionario' }));
-    expect(funcionarioRepository.create).toHaveBeenCalledWith(expect.objectContaining({ id_usuario: 'user-1', senha: undefined }));
+    await expect(
+      new CreateFuncionarioUseCase(
+        funcionarioRepository as any,
+        usuarioRepository as any,
+      ).execute(dto),
+    ).resolves.toEqual({ id_funcionario: 'func-1' });
+    expect(usuarioRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        senha: 'senha-hash',
+        tipo_usuario: 'funcionario',
+      }),
+    );
+    expect(funcionarioRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id_usuario: 'user-1', senha: undefined }),
+    );
   });
 
   it('atualiza funcionario e retorna busca final', async () => {
@@ -213,175 +299,404 @@ describe('funcionario', () => {
       findById: jest.fn().mockResolvedValue({ id_funcionario: '1' }),
       update: jest.fn(),
     });
-    await expect(new UpdateFuncionarioUseCase(repository as any).execute('1', { nome_completo: 'Novo' } as any)).resolves.toMatchObject({ id_funcionario: '1' });
-    expect(repository.update).toHaveBeenCalledWith('1', { nome_completo: 'Novo' });
+    await expect(
+      new UpdateFuncionarioUseCase(repository as any).execute('1', {
+        nome_completo: 'Novo',
+      } as any),
+    ).resolves.toMatchObject({ id_funcionario: '1' });
+    expect(repository.update).toHaveBeenCalledWith('1', {
+      nome_completo: 'Novo',
+    });
   });
 
   it('remove funcionario delegando ao repositorio', async () => {
     const repository = repo({ delete: jest.fn() });
-    await expect(new DeleteFuncionarioUseCase(repository as any).execute('1')).resolves.toBeUndefined();
+    await expect(
+      new DeleteFuncionarioUseCase(repository as any).execute('1'),
+    ).resolves.toBeUndefined();
     expect(repository.delete).toHaveBeenCalledWith('1');
   });
 });
 
 describe('cadastros com validacao de relacionamento', () => {
   it('cria pacote quando cliente existe', async () => {
-    const pacoteRepository = repo({ create: jest.fn().mockResolvedValue({ id_pacote: 'pacote-1' }) });
-    const clienteRepository = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'cliente-1' }) });
-    await expect(new CreatePacoteUseCase(pacoteRepository as any, clienteRepository as any).execute({ id_cliente: 'cliente-1' } as any)).resolves.toEqual({ id_pacote: 'pacote-1' });
+    const pacoteRepository = repo({
+      create: jest.fn().mockResolvedValue({ id_pacote: 'pacote-1' }),
+    });
+    const clienteRepository = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'cliente-1' }),
+    });
+    await expect(
+      new CreatePacoteUseCase(
+        pacoteRepository as any,
+        clienteRepository as any,
+      ).execute({ id_cliente: 'cliente-1' } as any),
+    ).resolves.toEqual({ id_pacote: 'pacote-1' });
   });
 
   it('falha ao criar pacote sem cliente', async () => {
-    await expect(new CreatePacoteUseCase(repo() as any, repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute({ id_cliente: 'x' } as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new CreatePacoteUseCase(
+        repo() as any,
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute({ id_cliente: 'x' } as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('cria contrato convertendo datas quando orcamento existe', async () => {
-    const contratoRepository = repo({ create: jest.fn().mockResolvedValue({ cod_contrato: 'c-1' }) });
-    const orcamentoRepository = repo({ findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) });
-    await expect(new CreateContratoUseCase(contratoRepository as any, orcamentoRepository as any).execute({
-      cod_orcamento: 'o-1',
-      data_inicio: '2026-01-01',
-      data_entrega: '2026-01-31',
-    } as any)).resolves.toEqual({ cod_contrato: 'c-1' });
-    expect(contratoRepository.create).toHaveBeenCalledWith(expect.objectContaining({ data_inicio: expect.any(Date), data_entrega: expect.any(Date) }));
+    const contratoRepository = repo({
+      create: jest.fn().mockResolvedValue({ cod_contrato: 'c-1' }),
+    });
+    const orcamentoRepository = repo({
+      findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    });
+    await expect(
+      new CreateContratoUseCase(
+        contratoRepository as any,
+        orcamentoRepository as any,
+      ).execute({
+        cod_orcamento: 'o-1',
+        data_inicio: '2026-01-01',
+        data_entrega: '2026-01-31',
+      } as any),
+    ).resolves.toEqual({ cod_contrato: 'c-1' });
+    expect(contratoRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data_inicio: expect.any(Date),
+        data_entrega: expect.any(Date),
+      }),
+    );
   });
 
   it('falha ao criar contrato sem orcamento', async () => {
-    await expect(new CreateContratoUseCase(repo() as any, repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute({ cod_orcamento: 'o-1' } as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new CreateContratoUseCase(
+        repo() as any,
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute({ cod_orcamento: 'o-1' } as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('cria solicitacao quando cliente existe', async () => {
-    const solicitacaoRepository = repo({ create: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }) });
-    const clienteRepository = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'cliente-1' }) });
-    await expect(new CreateSolicitacaoUseCase(solicitacaoRepository as any, clienteRepository as any).execute('cliente-1', { site: 'https://site.com', tipo_pacote: 'AA' } as any)).resolves.toEqual({ id_solicitacao: 's-1' });
-    expect(solicitacaoRepository.create).toHaveBeenCalledWith(expect.objectContaining({ id_cliente: 'cliente-1', status: 'PENDENTE' }));
+    const solicitacaoRepository = repo({
+      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }),
+    });
+    const clienteRepository = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'cliente-1' }),
+    });
+    await expect(
+      new CreateSolicitacaoUseCase(
+        solicitacaoRepository as any,
+        clienteRepository as any,
+      ).execute('cliente-1', {
+        site: 'https://site.com',
+        tipo_pacote: 'AA',
+      } as any),
+    ).resolves.toEqual({ id_solicitacao: 's-1' });
+    expect(solicitacaoRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({ id_cliente: 'cliente-1', status: 'PENDENTE' }),
+    );
   });
 
   it('falha ao criar solicitacao sem cliente', async () => {
-    await expect(new CreateSolicitacaoUseCase(repo() as any, repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute('cliente-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new CreateSolicitacaoUseCase(
+        repo() as any,
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute('cliente-1', {} as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
 
 describe('updates com validacao', () => {
   it('atualiza contrato, converte datas e busca orcamento quando codigo muda', async () => {
     const contratoRepository = repo({
-      findById: jest.fn()
-        .mockResolvedValueOnce({ cod_contrato: 'c-1', cod_orcamento: 'o-antigo' })
-        .mockResolvedValueOnce({ cod_contrato: 'c-1', cod_orcamento: 'o-novo' }),
+      findById: jest
+        .fn()
+        .mockResolvedValueOnce({
+          cod_contrato: 'c-1',
+          cod_orcamento: 'o-antigo',
+        })
+        .mockResolvedValueOnce({
+          cod_contrato: 'c-1',
+          cod_orcamento: 'o-novo',
+        }),
       update: jest.fn().mockResolvedValue([1]),
     });
     const orcamentoRepository = repo({
-      findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-novo', pacote: { id_cliente: 'cliente-1' } }),
+      findById: jest.fn().mockResolvedValue({
+        cod_orcamento: 'o-novo',
+        pacote: { id_cliente: 'cliente-1' },
+      }),
     });
 
-    await expect(new UpdateContratoUseCase(contratoRepository as any, orcamentoRepository as any).execute('c-1', {
-      cod_orcamento: 'o-novo',
-      data_inicio: '2026-01-01',
-      data_entrega: '2026-02-01',
-    } as any)).resolves.toMatchObject({ cod_orcamento: 'o-novo' });
-    expect(contratoRepository.update).toHaveBeenCalledWith('c-1', expect.objectContaining({
-      id_cliente: 'cliente-1',
-      data_inicio: expect.any(Date),
-      data_entrega: expect.any(Date),
-    }));
+    await expect(
+      new UpdateContratoUseCase(
+        contratoRepository as any,
+        orcamentoRepository as any,
+      ).execute('c-1', {
+        cod_orcamento: 'o-novo',
+        data_inicio: '2026-01-01',
+        data_entrega: '2026-02-01',
+      } as any),
+    ).resolves.toMatchObject({ cod_orcamento: 'o-novo' });
+    expect(contratoRepository.update).toHaveBeenCalledWith(
+      'c-1',
+      expect.objectContaining({
+        id_cliente: 'cliente-1',
+        data_inicio: expect.any(Date),
+        data_entrega: expect.any(Date),
+      }),
+    );
   });
 
   it('UpdateContratoUseCase falha quando contrato, orcamento ou update nao existem', async () => {
-    await expect(new UpdateContratoUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any, repo() as any).execute('c-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new UpdateContratoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+        repo() as any,
+      ).execute('c-1', {} as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
 
-    await expect(new UpdateContratoUseCase(
-      repo({ findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-antigo' }) }) as any,
-      repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
-    ).execute('c-1', { cod_orcamento: 'o-novo' } as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new UpdateContratoUseCase(
+        repo({
+          findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-antigo' }),
+        }) as any,
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute('c-1', { cod_orcamento: 'o-novo' } as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
 
-    await expect(new UpdateContratoUseCase(
-      repo({ findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }), update: jest.fn().mockResolvedValue([0]) }) as any,
-      repo() as any,
-    ).execute('c-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new UpdateContratoUseCase(
+        repo({
+          findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+          update: jest.fn().mockResolvedValue([0]),
+        }) as any,
+        repo() as any,
+      ).execute('c-1', {} as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('atualiza solicitacao e retorna linha afetada', async () => {
     const repository = repo({
       findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-1', status: 'APROVADA' }]]),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-1', status: 'APROVADA' }],
+        ]),
     });
 
-    await expect(new UpdateSolicitacaoUseCase(repository as any).execute('s-1', { status: 'APROVADA' } as any)).resolves.toMatchObject({ status: 'APROVADA' });
+    await expect(
+      new UpdateSolicitacaoUseCase(repository as any).execute('s-1', {
+        status: 'APROVADA',
+      } as any),
+    ).resolves.toMatchObject({ status: 'APROVADA' });
   });
 
   it('UpdateSolicitacaoUseCase falha quando nao encontra solicitacao ou update afeta zero linhas', async () => {
-    await expect(new UpdateSolicitacaoUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute('s-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
-    await expect(new UpdateSolicitacaoUseCase(repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }),
-      update: jest.fn().mockResolvedValue([0, []]),
-    }) as any).execute('s-1', {} as any)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new UpdateSolicitacaoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute('s-1', {} as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new UpdateSolicitacaoUseCase(
+        repo({
+          findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }),
+          update: jest.fn().mockResolvedValue([0, []]),
+        }) as any,
+      ).execute('s-1', {} as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
 
 describe('orcamento', () => {
   it('cria orcamento com validade de 30 dias quando pacote existe', async () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-04-01T00:00:00Z'));
-    const orcamentoRepository = repo({ findByPacote: jest.fn().mockResolvedValue(null), create: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) });
-    const pacoteRepository = repo({ findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }) });
+    const orcamentoRepository = repo({
+      findByPacote: jest.fn().mockResolvedValue(null),
+      create: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    });
+    const pacoteRepository = repo({
+      findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }),
+    });
 
-    await expect(new CreateOrcamentoUseCase(orcamentoRepository as any, pacoteRepository as any).execute({ id_pacote: 'p-1' } as any)).resolves.toEqual({ cod_orcamento: 'o-1' });
-    expect(orcamentoRepository.create).toHaveBeenCalledWith(expect.objectContaining({ data_orcamento: new Date('2026-04-01T00:00:00Z'), data_validade: new Date('2026-05-01T00:00:00Z') }));
+    await expect(
+      new CreateOrcamentoUseCase(
+        orcamentoRepository as any,
+        pacoteRepository as any,
+      ).execute({ id_pacote: 'p-1' } as any),
+    ).resolves.toEqual({ cod_orcamento: 'o-1' });
+    expect(orcamentoRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data_orcamento: new Date('2026-04-01T00:00:00Z'),
+        data_validade: new Date('2026-05-01T00:00:00Z'),
+      }),
+    );
     jest.useRealTimers();
   });
 
   it('falha quando ja existe orcamento para o pacote', async () => {
-    await expect(new CreateOrcamentoUseCase(repo({ findByPacote: jest.fn().mockResolvedValue({}) }) as any, repo() as any).execute({ id_pacote: 'p-1' } as any)).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      new CreateOrcamentoUseCase(
+        repo({ findByPacote: jest.fn().mockResolvedValue({}) }) as any,
+        repo() as any,
+      ).execute({ id_pacote: 'p-1' } as any),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('falha quando pacote nao existe', async () => {
-    const orcamentoRepository = repo({ findByPacote: jest.fn().mockResolvedValue(null) });
-    await expect(new CreateOrcamentoUseCase(orcamentoRepository as any, repo({ findById: jest.fn().mockResolvedValue(null) }) as any).execute({ id_pacote: 'p-1' } as any)).rejects.toBeInstanceOf(NotFoundException);
+    const orcamentoRepository = repo({
+      findByPacote: jest.fn().mockResolvedValue(null),
+    });
+    await expect(
+      new CreateOrcamentoUseCase(
+        orcamentoRepository as any,
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+      ).execute({ id_pacote: 'p-1' } as any),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 });
 
 describe('solicitacao para orcamento', () => {
   it('cria pacote, orcamento e atualiza solicitacao', async () => {
     const solicitacaoRepository = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', id_cliente: 'c-1', tipo_pacote: 'AAA' }),
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-1',
+        id_cliente: 'c-1',
+        tipo_pacote: 'AAA',
+      }),
       update: jest.fn(),
     });
-    const createPacoteUseCase = { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }) };
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
+    const createPacoteUseCase = {
+      execute: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }),
+    };
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
 
-    await expect(new CreateOrcamentoFromSolicitacaoUseCase(solicitacaoRepository as any, createPacoteUseCase as any, createOrcamentoUseCase as any, repo() as any).execute('s-1')).resolves.toEqual({ cod_orcamento: 'o-1' });
-    expect(createPacoteUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ valor_base: 2000 }));
-    expect(solicitacaoRepository.update).toHaveBeenCalledWith('s-1', expect.objectContaining({ status: 'ORCAMENTO_CRIADO' }));
+    await expect(
+      new CreateOrcamentoFromSolicitacaoUseCase(
+        solicitacaoRepository as any,
+        createPacoteUseCase as any,
+        createOrcamentoUseCase as any,
+        repo() as any,
+      ).execute('s-1'),
+    ).resolves.toEqual({ cod_orcamento: 'o-1' });
+    expect(createPacoteUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ valor_base: 2000 }),
+    );
+    expect(solicitacaoRepository.update).toHaveBeenCalledWith(
+      's-1',
+      expect.objectContaining({ status: 'ORCAMENTO_CRIADO' }),
+    );
   });
 
   it('usa valor base do pacote existente quando valor nao foi informado', async () => {
-    const solicitacaoRepository = repo({ findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', id_cliente: 'c-1', tipo_pacote: 'A', id_pacote: 'p-1' }), update: jest.fn() });
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
-    const pacoteRepository = repo({ findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1', valor_base: '1234.50' }) });
+    const solicitacaoRepository = repo({
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-1',
+        id_cliente: 'c-1',
+        tipo_pacote: 'A',
+        id_pacote: 'p-1',
+      }),
+      update: jest.fn(),
+    });
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
+    const pacoteRepository = repo({
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_pacote: 'p-1', valor_base: '1234.50' }),
+    });
 
-    await new CreateOrcamentoFromSolicitacaoUseCase(solicitacaoRepository as any, { execute: jest.fn() } as any, createOrcamentoUseCase as any, pacoteRepository as any).execute('s-1');
-    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ valor_orcamento: 1234.5 }));
+    await new CreateOrcamentoFromSolicitacaoUseCase(
+      solicitacaoRepository as any,
+      { execute: jest.fn() } as any,
+      createOrcamentoUseCase as any,
+      pacoteRepository as any,
+    ).execute('s-1');
+    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ valor_orcamento: 1234.5 }),
+    );
   });
 
   it('usa valor informado mesmo quando pacote existente tem outro valor', async () => {
-    const solicitacaoRepository = repo({ findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', id_cliente: 'c-1', tipo_pacote: 'A', id_pacote: 'p-1' }), update: jest.fn() });
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
+    const solicitacaoRepository = repo({
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-1',
+        id_cliente: 'c-1',
+        tipo_pacote: 'A',
+        id_pacote: 'p-1',
+      }),
+      update: jest.fn(),
+    });
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
 
-    await new CreateOrcamentoFromSolicitacaoUseCase(solicitacaoRepository as any, { execute: jest.fn() } as any, createOrcamentoUseCase as any, repo() as any).execute('s-1', 999);
-    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ valor_orcamento: 999 }));
+    await new CreateOrcamentoFromSolicitacaoUseCase(
+      solicitacaoRepository as any,
+      { execute: jest.fn() } as any,
+      createOrcamentoUseCase as any,
+      repo() as any,
+    ).execute('s-1', 999);
+    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ valor_orcamento: 999 }),
+    );
   });
 
   it('usa valor base padrao quando tipo de pacote nao mapeado e pacote nao e encontrado', async () => {
-    const solicitacaoRepository = repo({ findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', id_cliente: 'c-1', tipo_pacote: 'ZZ', id_pacote: 'p-1' }), update: jest.fn() });
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
-    const pacoteRepository = repo({ findById: jest.fn().mockResolvedValue(null) });
+    const solicitacaoRepository = repo({
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-1',
+        id_cliente: 'c-1',
+        tipo_pacote: 'ZZ',
+        id_pacote: 'p-1',
+      }),
+      update: jest.fn(),
+    });
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
+    const pacoteRepository = repo({
+      findById: jest.fn().mockResolvedValue(null),
+    });
 
-    await new CreateOrcamentoFromSolicitacaoUseCase(solicitacaoRepository as any, { execute: jest.fn() } as any, createOrcamentoUseCase as any, pacoteRepository as any).execute('s-1');
-    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ valor_orcamento: 1500 }));
+    await new CreateOrcamentoFromSolicitacaoUseCase(
+      solicitacaoRepository as any,
+      { execute: jest.fn() } as any,
+      createOrcamentoUseCase as any,
+      pacoteRepository as any,
+    ).execute('s-1');
+    expect(createOrcamentoUseCase.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ valor_orcamento: 1500 }),
+    );
   });
 
   it('falha quando solicitacao nao existe ou ja tem orcamento', async () => {
-    await expect(new CreateOrcamentoFromSolicitacaoUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any, {} as any, {} as any, {} as any).execute('s-1')).rejects.toBeInstanceOf(NotFoundException);
-    await expect(new CreateOrcamentoFromSolicitacaoUseCase(repo({ findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) }) as any, {} as any, {} as any, {} as any).execute('s-1')).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      new CreateOrcamentoFromSolicitacaoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+        {} as any,
+        {} as any,
+        {} as any,
+      ).execute('s-1'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new CreateOrcamentoFromSolicitacaoUseCase(
+        repo({
+          findById: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+        }) as any,
+        {} as any,
+        {} as any,
+        {} as any,
+      ).execute('s-1'),
+    ).rejects.toBeInstanceOf(ConflictException);
   });
 });
 
@@ -391,22 +706,44 @@ describe('log e notificacoes', () => {
       create: jest.fn().mockResolvedValue({ id: 'l-1' }),
       deleteOldLogs: jest.fn().mockResolvedValue(2),
       findByDateRange: jest.fn().mockResolvedValue({ items: [] }),
-      findByFilters: jest.fn().mockResolvedValue({ logs: [], lastEvaluatedKey: undefined }),
+      findByFilters: jest
+        .fn()
+        .mockResolvedValue({ logs: [], lastEvaluatedKey: undefined }),
       findById: jest.fn().mockResolvedValue({ id: 'l-1' }),
       findByLevel: jest.fn().mockResolvedValue({ items: [] }),
       findByUserId: jest.fn().mockResolvedValue({ logs: [] }),
-      findAll: jest.fn().mockResolvedValue({ items: [], lastEvaluatedKey: undefined }),
+      findAll: jest
+        .fn()
+        .mockResolvedValue({ items: [], lastEvaluatedKey: undefined }),
       getLogStats: jest.fn().mockResolvedValue({ total: 1 }),
     });
 
-    await expect(new CreateLogUseCase(repository as any).execute({ level: 'info' } as any)).resolves.toEqual({ id: 'l-1' });
-    await expect(new DeleteOldLogsUseCase(repository as any).execute('2026-01-01')).resolves.toBe(2);
-    await expect(new GetLogUseCase(repository as any).execute('id', 'ts')).resolves.toEqual({ id: 'l-1' });
-    await expect(new GetLogsByDateRangeUseCase(repository as any).execute('a', 'b', 10, { k: 1 })).resolves.toEqual({ items: [] });
-    await expect(new GetLogsByLevelUseCase(repository as any).execute('error', 10)).resolves.toEqual({ items: [] });
-    await expect(new GetLogsByUserUseCase(repository as any).execute('u-1')).resolves.toEqual({ logs: [] });
-    await expect(new ListLogsUseCase(repository as any).execute({ limit: 5 } as any)).resolves.toEqual({ logs: [], lastEvaluatedKey: undefined });
-    await expect(new GetLogStatsUseCase(repository as any).execute()).resolves.toEqual({ total: 1 });
+    await expect(
+      new CreateLogUseCase(repository as any).execute({ level: 'info' } as any),
+    ).resolves.toEqual({ id: 'l-1' });
+    await expect(
+      new DeleteOldLogsUseCase(repository as any).execute('2026-01-01'),
+    ).resolves.toBe(2);
+    await expect(
+      new GetLogUseCase(repository as any).execute('id', 'ts'),
+    ).resolves.toEqual({ id: 'l-1' });
+    await expect(
+      new GetLogsByDateRangeUseCase(repository as any).execute('a', 'b', 10, {
+        k: 1,
+      }),
+    ).resolves.toEqual({ items: [] });
+    await expect(
+      new GetLogsByLevelUseCase(repository as any).execute('error', 10),
+    ).resolves.toEqual({ items: [] });
+    await expect(
+      new GetLogsByUserUseCase(repository as any).execute('u-1'),
+    ).resolves.toEqual({ logs: [] });
+    await expect(
+      new ListLogsUseCase(repository as any).execute({ limit: 5 } as any),
+    ).resolves.toEqual({ logs: [], lastEvaluatedKey: undefined });
+    await expect(
+      new GetLogStatsUseCase(repository as any).execute(),
+    ).resolves.toEqual({ total: 1 });
   });
 
   it('delega operacoes de notificacao', async () => {
@@ -419,39 +756,84 @@ describe('log e notificacoes', () => {
       marcarTodasComoLidas: jest.fn().mockResolvedValue(3),
     });
 
-    await expect(new CreateNotificacaoUseCase(repository as any).execute({ titulo: 'Oi' } as any)).resolves.toEqual({ id: 'n-1' });
-    await expect(new GetNotificacoesUseCase(repository as any).execute('u-1', true)).resolves.toEqual([{ id: 'n-1' }]);
-    await expect(new GetNotificacoesUseCase(repository as any).execute('u-1')).resolves.toEqual([{ id: 'n-1' }]);
-    await expect(new GetNotificacoesUseCase(repository as any).countNaoLidas('u-1')).resolves.toBe(1);
-    await expect(new MarcarNotificacaoLidaUseCase(repository as any).execute('n-1', 'u-1')).resolves.toEqual({ id: 'n-1', lida: true });
-    await expect(new MarcarNotificacaoLidaUseCase(repository as any).marcarTodas('u-1')).resolves.toBe(3);
+    await expect(
+      new CreateNotificacaoUseCase(repository as any).execute({
+        titulo: 'Oi',
+      } as any),
+    ).resolves.toEqual({ id: 'n-1' });
+    await expect(
+      new GetNotificacoesUseCase(repository as any).execute('u-1', true),
+    ).resolves.toEqual([{ id: 'n-1' }]);
+    await expect(
+      new GetNotificacoesUseCase(repository as any).execute('u-1'),
+    ).resolves.toEqual([{ id: 'n-1' }]);
+    await expect(
+      new GetNotificacoesUseCase(repository as any).countNaoLidas('u-1'),
+    ).resolves.toBe(1);
+    await expect(
+      new MarcarNotificacaoLidaUseCase(repository as any).execute('n-1', 'u-1'),
+    ).resolves.toEqual({ id: 'n-1', lida: true });
+    await expect(
+      new MarcarNotificacaoLidaUseCase(repository as any).marcarTodas('u-1'),
+    ).resolves.toBe(3);
   });
 });
 
 describe('assinatura de contrato', () => {
   it('assina contrato encontrado e atualiza repositorio', async () => {
-    const contratoRepository = repo({ findById: jest.fn().mockResolvedValue({ cod_contrato: 'c-1' }), update: jest.fn() });
+    const contratoRepository = repo({
+      findById: jest.fn().mockResolvedValue({ cod_contrato: 'c-1' }),
+      update: jest.fn(),
+    });
     const signatureService = {
       validateSignatureBase64: jest.fn().mockReturnValue(true),
       signPDF: jest.fn().mockResolvedValue('/assinado.pdf'),
     };
 
-    await expect(new SignContratoUseCase(contratoRepository as any, signatureService as any).execute('c-1', 'base64', __filename)).resolves.toEqual({ signedContractPath: '/assinado.pdf' });
-    expect(signatureService.signPDF).toHaveBeenCalledWith(__filename, 'base64', expect.stringContaining('contrato_c-1_assinado_'));
+    await expect(
+      new SignContratoUseCase(
+        contratoRepository as any,
+        signatureService as any,
+      ).execute('c-1', 'base64', __filename),
+    ).resolves.toEqual({ signedContractPath: '/assinado.pdf' });
+    expect(signatureService.signPDF).toHaveBeenCalledWith(
+      __filename,
+      'base64',
+      expect.stringContaining('contrato_c-1_assinado_'),
+    );
     expect(contratoRepository.update).toHaveBeenCalled();
   });
 
   it('falha quando contrato nao existe', async () => {
-    await expect(new SignContratoUseCase(repo({ findById: jest.fn().mockResolvedValue(null) }) as any, {} as any).execute('c-1', 'base64')).rejects.toBeInstanceOf(NotFoundException);
+    await expect(
+      new SignContratoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue(null) }) as any,
+        {} as any,
+      ).execute('c-1', 'base64'),
+    ).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('falha quando assinatura e invalida', async () => {
-    const signatureService = { validateSignatureBase64: jest.fn().mockReturnValue(false) };
-    await expect(new SignContratoUseCase(repo({ findById: jest.fn().mockResolvedValue({}) }) as any, signatureService as any).execute('c-1', 'base64')).rejects.toBeInstanceOf(BadRequestException);
+    const signatureService = {
+      validateSignatureBase64: jest.fn().mockReturnValue(false),
+    };
+    await expect(
+      new SignContratoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue({}) }) as any,
+        signatureService as any,
+      ).execute('c-1', 'base64'),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('falha quando arquivo nao existe', async () => {
-    const signatureService = { validateSignatureBase64: jest.fn().mockReturnValue(true) };
-    await expect(new SignContratoUseCase(repo({ findById: jest.fn().mockResolvedValue({}) }) as any, signatureService as any).execute('c-1', 'base64')).rejects.toBeInstanceOf(BadRequestException);
+    const signatureService = {
+      validateSignatureBase64: jest.fn().mockReturnValue(true),
+    };
+    await expect(
+      new SignContratoUseCase(
+        repo({ findById: jest.fn().mockResolvedValue({}) }) as any,
+        signatureService as any,
+      ).execute('c-1', 'base64'),
+    ).rejects.toBeInstanceOf(BadRequestException);
   });
 });

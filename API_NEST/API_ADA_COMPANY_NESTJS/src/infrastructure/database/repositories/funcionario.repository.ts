@@ -26,11 +26,17 @@ export class FuncionarioRepositoryImpl implements FuncionarioRepository {
     return this.funcionarioModel.findByPk(id, { include: [Usuario] });
   }
 
-  async update(id: string, data: Partial<FuncionarioModel>): Promise<[number, FuncionarioModel[]]> {
-    const [affectedCount, affectedRows] = await this.funcionarioModel.update(data, {
-      where: { id_funcionario: id },
-      returning: true,
-    });
+  async update(
+    id: string,
+    data: Partial<FuncionarioModel>,
+  ): Promise<[number, FuncionarioModel[]]> {
+    const [affectedCount, affectedRows] = await this.funcionarioModel.update(
+      data,
+      {
+        where: { id_funcionario: id },
+        returning: true,
+      },
+    );
     return [affectedCount, affectedRows as any];
   }
 
@@ -45,4 +51,4 @@ export class FuncionarioRepositoryImpl implements FuncionarioRepository {
       where: { email },
     });
   }
-} 
+}

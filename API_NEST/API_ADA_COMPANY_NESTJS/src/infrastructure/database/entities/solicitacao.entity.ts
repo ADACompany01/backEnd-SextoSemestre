@@ -1,4 +1,11 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { Cliente } from './cliente.entity';
 
 @Table({ tableName: 'solicitacoes' })
@@ -51,12 +58,23 @@ export class Solicitacao extends Model<Solicitacao> {
   selected_issues?: any;
 
   @Column({
-    type: DataType.ENUM('PENDENTE', 'EM_ANALISE', 'ORCAMENTO_CRIADO', 'ORCAMENTO_APROVADO', 'CANCELADA'),
+    type: DataType.ENUM(
+      'PENDENTE',
+      'EM_ANALISE',
+      'ORCAMENTO_CRIADO',
+      'ORCAMENTO_APROVADO',
+      'CANCELADA',
+    ),
     allowNull: false,
     defaultValue: 'PENDENTE',
     field: 'status',
   })
-  status: 'PENDENTE' | 'EM_ANALISE' | 'ORCAMENTO_CRIADO' | 'ORCAMENTO_APROVADO' | 'CANCELADA';
+  status:
+    | 'PENDENTE'
+    | 'EM_ANALISE'
+    | 'ORCAMENTO_CRIADO'
+    | 'ORCAMENTO_APROVADO'
+    | 'CANCELADA';
 
   @Column({
     type: DataType.UUID,
@@ -72,4 +90,3 @@ export class Solicitacao extends Model<Solicitacao> {
   })
   cod_orcamento?: string;
 }
-

@@ -4,12 +4,9 @@ import { SolicitacaoRepository } from '../../../domain/repositories/solicitacao.
 
 @Injectable()
 export class ListSolicitacoesUseCase {
-  constructor(
-    private readonly solicitacaoRepository: SolicitacaoRepository,
-  ) {}
+  constructor(private readonly solicitacaoRepository: SolicitacaoRepository) {}
 
   async execute(): Promise<SolicitacaoModel[]> {
     return this.solicitacaoRepository.findAll();
   }
 }
-

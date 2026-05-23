@@ -53,4 +53,4 @@ export class Usuario extends Model<Usuario> {
 
   @HasOne(() => Funcionario)
   funcionario: Funcionario;
-} 
+}

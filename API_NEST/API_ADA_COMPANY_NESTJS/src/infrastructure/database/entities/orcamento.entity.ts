@@ -1,4 +1,12 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasOne } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+  HasOne,
+} from 'sequelize-typescript';
 import { Pacote } from './pacote.entity';
 import { Contrato } from './contrato.entity';
 
@@ -13,7 +21,7 @@ export class Orcamento extends Model<Orcamento> {
   cod_orcamento: string;
 
   @Column({
-    type: DataType.DECIMAL(10,2),
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
     field: 'valor_orcamento',
   })
@@ -53,4 +61,4 @@ export class Orcamento extends Model<Orcamento> {
     field: 'arquivo_orcamento',
   })
   arquivo_orcamento?: string;
-} 
+}

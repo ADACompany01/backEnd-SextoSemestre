@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Inject,
+} from '@nestjs/common';
 import { SolicitacaoRepository } from '../../../domain/repositories/solicitacao.repository.interface';
 import { SOLICITACAO_REPOSITORY } from '../../../infrastructure/providers/solicitacao.provider';
 import { CreatePacoteUseCase } from '../pacote/create-pacote.use-case';
@@ -12,9 +17,9 @@ import { TipoPacote } from '../../../interfaces/http/dtos/requests/create-pacote
 export class CreateOrcamentoFromSolicitacaoUseCase {
   // Valores base para cada tipo de pacote
   private readonly VALORES_BASE = {
-    A: 1000.00,
-    AA: 1500.00,
-    AAA: 2000.00,
+    A: 1000.0,
+    AA: 1500.0,
+    AAA: 2000.0,
   };
 
   constructor(
@@ -26,16 +31,24 @@ export class CreateOrcamentoFromSolicitacaoUseCase {
     private readonly pacoteRepository: PacoteRepository,
   ) {}
 
-  async execute(id_solicitacao: string, valor_orcamento?: number): Promise<OrcamentoModel> {
+  async execute(
+    id_solicitacao: string,
+    valor_orcamento?: number,
+  ): Promise<OrcamentoModel> {
     // Buscar a solicitação
-    const solicitacao = await this.solicitacaoRepository.findById(id_solicitacao);
+    const solicitacao =
+      await this.solicitacaoRepository.findById(id_solicitacao);
     if (!solicitacao) {
-      throw new NotFoundException(`Solicitação com ID ${id_solicitacao} não encontrada`);
+      throw new NotFoundException(
+        `Solicitação com ID ${id_solicitacao} não encontrada`,
+      );
     }
 
     // Verificar se já existe um orçamento para esta solicitação
     if (solicitacao.cod_orcamento) {
-      throw new ConflictException('Já existe um orçamento para esta solicitação');
+      throw new ConflictException(
+        'Já existe um orçamento para esta solicitação',
+      );
     }
 
     // Verificar se já existe um pacote para esta solicitação
@@ -44,7 +57,8 @@ export class CreateOrcamentoFromSolicitacaoUseCase {
     // Se não existir pacote, criar um novo
     if (!id_pacote) {
       // Calcular valor base do pacote
-      const valor_base = this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
+      const valor_base =
+        this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
 
       // Criar pacote
       const pacote = await this.createPacoteUseCase.execute({
@@ -70,10 +84,12 @@ export class CreateOrcamentoFromSolicitacaoUseCase {
         if (pacote) {
           valorOrcamento = Number(pacote.valor_base);
         } else {
-          valorOrcamento = this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
+          valorOrcamento =
+            this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
         }
       } else {
-        valorOrcamento = this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
+        valorOrcamento =
+          this.VALORES_BASE[solicitacao.tipo_pacote] || this.VALORES_BASE.AA;
       }
     }
 
@@ -98,4 +114,3 @@ export class CreateOrcamentoFromSolicitacaoUseCase {
     return orcamento;
   }
 }
-

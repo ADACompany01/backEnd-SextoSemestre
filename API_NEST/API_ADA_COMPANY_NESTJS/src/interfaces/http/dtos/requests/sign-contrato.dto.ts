@@ -18,4 +18,3 @@ export class SignContratoDto {
   @IsNotEmpty({ message: 'A assinatura é obrigatória.' })
   signature: string;
 }
-

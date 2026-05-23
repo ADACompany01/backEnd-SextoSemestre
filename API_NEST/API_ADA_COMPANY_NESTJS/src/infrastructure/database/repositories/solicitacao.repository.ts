@@ -22,14 +22,14 @@ export class SolicitacaoRepositoryImpl implements SolicitacaoRepository {
       include: [Cliente],
       order: [['createdAt', 'DESC']],
     });
-    return solicitacoes.map(s => s.toJSON() as SolicitacaoModel);
+    return solicitacoes.map((s) => s.toJSON() as SolicitacaoModel);
   }
 
   async findById(id: string): Promise<SolicitacaoModel | null> {
     const solicitacao = await this.solicitacaoModel.findByPk(id, {
       include: [Cliente],
     });
-    return solicitacao ? solicitacao.toJSON() as SolicitacaoModel : null;
+    return solicitacao ? (solicitacao.toJSON() as SolicitacaoModel) : null;
   }
 
   async findByCliente(id_cliente: string): Promise<SolicitacaoModel[]> {
@@ -38,15 +38,21 @@ export class SolicitacaoRepositoryImpl implements SolicitacaoRepository {
       include: [Cliente],
       order: [['createdAt', 'DESC']],
     });
-    return solicitacoes.map(s => s.toJSON() as SolicitacaoModel);
+    return solicitacoes.map((s) => s.toJSON() as SolicitacaoModel);
   }
 
-  async update(id: string, data: Partial<SolicitacaoModel>): Promise<[number, SolicitacaoModel[]]> {
-    const [affectedCount, affectedRows] = await this.solicitacaoModel.update(data, {
-      where: { id_solicitacao: id },
-      returning: true,
-    });
-    const updated = affectedRows.map(s => s.toJSON() as SolicitacaoModel);
+  async update(
+    id: string,
+    data: Partial<SolicitacaoModel>,
+  ): Promise<[number, SolicitacaoModel[]]> {
+    const [affectedCount, affectedRows] = await this.solicitacaoModel.update(
+      data,
+      {
+        where: { id_solicitacao: id },
+        returning: true,
+      },
+    );
+    const updated = affectedRows.map((s) => s.toJSON() as SolicitacaoModel);
     return [affectedCount, updated];
   }
 
@@ -56,4 +62,3 @@ export class SolicitacaoRepositoryImpl implements SolicitacaoRepository {
     });
   }
 }
-

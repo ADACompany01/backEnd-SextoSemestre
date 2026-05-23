@@ -7,4 +7,4 @@ export class GetOrcamentoUseCase {
   async execute(id: string): Promise<OrcamentoModel | null> {
     return this.orcamentoRepository.findById(id);
   }
-} 
+}

@@ -30,4 +30,4 @@ export class CreateFuncionarioUseCase {
 
     return this.funcionarioRepository.create(funcionarioData);
   }
-} 
+}

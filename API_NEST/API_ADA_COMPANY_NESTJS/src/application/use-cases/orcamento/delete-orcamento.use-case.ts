@@ -6,4 +6,4 @@ export class DeleteOrcamentoUseCase {
   async execute(id: string): Promise<void> {
     await this.orcamentoRepository.delete(id);
   }
-} 
+}

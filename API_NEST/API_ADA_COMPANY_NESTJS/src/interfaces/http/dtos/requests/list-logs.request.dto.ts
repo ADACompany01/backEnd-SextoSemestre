@@ -1,10 +1,21 @@
-import { IsEnum, IsString, IsOptional, IsNumber, IsDateString, Min, Max } from 'class-validator';
+import {
+  IsEnum,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  Min,
+  Max,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { LogLevel } from '../../../../domain/models/log.model';
 import { Transform } from 'class-transformer';
 
 export class ListLogsRequestDto {
-  @ApiPropertyOptional({ enum: LogLevel, description: 'Filtrar por nível do log' })
+  @ApiPropertyOptional({
+    enum: LogLevel,
+    description: 'Filtrar por nível do log',
+  })
   @IsOptional()
   @IsEnum(LogLevel)
   level?: LogLevel;
@@ -34,7 +45,11 @@ export class ListLogsRequestDto {
   @IsDateString()
   endDate?: string;
 
-  @ApiPropertyOptional({ description: 'Limite de resultados', minimum: 1, maximum: 1000 })
+  @ApiPropertyOptional({
+    description: 'Limite de resultados',
+    minimum: 1,
+    maximum: 1000,
+  })
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
   @IsNumber()

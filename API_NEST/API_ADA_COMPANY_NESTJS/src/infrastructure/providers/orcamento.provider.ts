@@ -6,4 +6,4 @@ export const ORCAMENTO_REPOSITORY = 'ORCAMENTO_REPOSITORY';
 export const OrcamentoRepositoryProvider: Provider = {
   provide: ORCAMENTO_REPOSITORY,
   useClass: OrcamentoRepository,
-}; 
+};

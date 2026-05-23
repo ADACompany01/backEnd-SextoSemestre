@@ -1,4 +1,11 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { Usuario } from './usuario.entity';
 
 @Table({ tableName: 'funcionarios' })
@@ -43,4 +50,4 @@ export class Funcionario extends Model<Funcionario> {
 
   @BelongsTo(() => Usuario)
   usuario: Usuario;
-} 
+}

@@ -1,11 +1,18 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { Orcamento } from './orcamento.entity';
 
 export enum StatusContrato {
   EM_ANALISE = 'EM_ANALISE',
   EM_ANDAMENTO = 'EM_ANDAMENTO',
   CANCELADO = 'CANCELADO',
-  CONCLUIDO = 'CONCLUIDO'
+  CONCLUIDO = 'CONCLUIDO',
 }
 
 @Table({ tableName: 'contratos' })
@@ -19,7 +26,7 @@ export class Contrato extends Model<Contrato> {
   id_contrato: string;
 
   @Column({
-    type: DataType.DECIMAL(10,2),
+    type: DataType.DECIMAL(10, 2),
     allowNull: false,
     field: 'valor_contrato',
   })
@@ -70,4 +77,4 @@ export class Contrato extends Model<Contrato> {
     field: 'contrato_assinado_url',
   })
   contrato_assinado_url?: string;
-} 
+}

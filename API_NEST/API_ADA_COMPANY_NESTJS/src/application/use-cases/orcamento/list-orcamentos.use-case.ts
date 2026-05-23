@@ -7,4 +7,4 @@ export class ListOrcamentosUseCase {
   async execute(): Promise<OrcamentoModel[]> {
     return this.orcamentoRepository.findAll();
   }
-} 
+}

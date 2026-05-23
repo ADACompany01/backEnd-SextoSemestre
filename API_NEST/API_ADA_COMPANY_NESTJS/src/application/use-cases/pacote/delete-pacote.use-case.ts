@@ -6,4 +6,4 @@ export class DeletePacoteUseCase {
   async execute(id: string): Promise<number> {
     return this.pacoteRepository.delete(id);
   }
-} 
+}

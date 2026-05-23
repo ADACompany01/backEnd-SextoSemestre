@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ConflictException, Inject } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  Inject,
+} from '@nestjs/common';
 import { Orcamento as OrcamentoModel } from '../../../domain/models/orcamento.model';
 import { OrcamentoRepository } from '../../../infrastructure/database/repositories/orcamento.repository';
 import { CreateOrcamentoDto } from '../../../interfaces/http/dtos/requests/create-orcamento.dto';
@@ -15,7 +20,9 @@ export class CreateOrcamentoUseCase {
 
   async execute(data: CreateOrcamentoDto): Promise<OrcamentoModel> {
     // Verificar se já existe um orçamento para este pacote
-    const existingOrcamento = await this.orcamentoRepository.findByPacote(data.id_pacote);
+    const existingOrcamento = await this.orcamentoRepository.findByPacote(
+      data.id_pacote,
+    );
     if (existingOrcamento) {
       throw new ConflictException(`Já existe um orçamento para este pacote`);
     }
@@ -23,7 +30,9 @@ export class CreateOrcamentoUseCase {
     // Verificar se o pacote existe
     const pacote = await this.pacoteRepository.findById(data.id_pacote);
     if (!pacote) {
-      throw new NotFoundException(`Pacote com ID ${data.id_pacote} não encontrado`);
+      throw new NotFoundException(
+        `Pacote com ID ${data.id_pacote} não encontrado`,
+      );
     }
 
     const dataAtual = new Date();
@@ -36,4 +45,4 @@ export class CreateOrcamentoUseCase {
       data_validade: dataValidade,
     });
   }
-} 
+}

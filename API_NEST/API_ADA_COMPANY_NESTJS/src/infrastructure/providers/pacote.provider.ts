@@ -6,4 +6,4 @@ export const PACOTE_REPOSITORY = 'PACOTE_REPOSITORY';
 export const PacoteRepositoryProvider: Provider = {
   provide: PACOTE_REPOSITORY,
   useClass: PacoteRepositoryImpl,
-}; 
+};

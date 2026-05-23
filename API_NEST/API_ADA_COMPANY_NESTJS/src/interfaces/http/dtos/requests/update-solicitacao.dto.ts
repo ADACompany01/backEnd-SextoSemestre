@@ -47,4 +47,3 @@ export class UpdateSolicitacaoDto {
   @IsUUID()
   cod_orcamento?: string;
 }
-

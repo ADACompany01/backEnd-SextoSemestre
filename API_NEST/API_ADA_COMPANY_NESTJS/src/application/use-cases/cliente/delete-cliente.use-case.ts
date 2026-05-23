@@ -10,4 +10,4 @@ export class DeleteClienteUseCase {
     }
     await this.clienteRepository.delete(id);
   }
-} 
+}

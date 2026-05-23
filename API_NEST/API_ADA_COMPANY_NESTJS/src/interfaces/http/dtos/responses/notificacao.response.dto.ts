@@ -10,7 +10,10 @@ export class NotificacaoResponseDto {
   @ApiProperty({ description: 'Mensagem da notificação' })
   mensagem: string;
 
-  @ApiProperty({ enum: ['info', 'sucesso', 'aviso', 'erro'], description: 'Tipo da notificação' })
+  @ApiProperty({
+    enum: ['info', 'sucesso', 'aviso', 'erro'],
+    description: 'Tipo da notificação',
+  })
   tipo: 'info' | 'sucesso' | 'aviso' | 'erro';
 
   @ApiProperty({ description: 'ID do usuário destinatário' })
@@ -31,5 +34,3 @@ export class NotificacaoResponseDto {
   @ApiProperty({ description: 'Data de atualização' })
   updatedAt: Date;
 }
-
-

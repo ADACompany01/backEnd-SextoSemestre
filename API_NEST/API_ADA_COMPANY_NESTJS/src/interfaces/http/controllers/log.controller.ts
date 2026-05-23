@@ -51,22 +51,36 @@ export class LogController {
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo log' })
-  @ApiResponse({ status: 201, description: 'Log criado com sucesso', type: LogResponseDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Log criado com sucesso',
+    type: LogResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  async create(@Body() createLogDto: CreateLogRequestDto): Promise<LogResponseDto> {
+  async create(
+    @Body() createLogDto: CreateLogRequestDto,
+  ): Promise<LogResponseDto> {
     return await this.createLogUseCase.execute(createLogDto);
   }
 
   @Get('stats')
   @ApiOperation({ summary: 'Obter estatísticas dos logs' })
-  @ApiResponse({ status: 200, description: 'Estatísticas obtidas com sucesso', type: LogStatsResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Estatísticas obtidas com sucesso',
+    type: LogStatsResponseDto,
+  })
   async getStats(): Promise<LogStatsResponseDto> {
     return await this.getLogStatsUseCase.execute();
   }
 
   @Get()
   @ApiOperation({ summary: 'Listar logs com filtros' })
-  @ApiResponse({ status: 200, description: 'Lista de logs obtida com sucesso', type: [LogResponseDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de logs obtida com sucesso',
+    type: [LogResponseDto],
+  })
   async list(@Query() query: ListLogsRequestDto): Promise<{
     logs: LogResponseDto[];
     lastEvaluatedKey?: Record<string, any>;
@@ -79,7 +93,9 @@ export class LogController {
       startDate: query.startDate,
       endDate: query.endDate,
       limit: query.limit,
-      lastEvaluatedKey: query.lastEvaluatedKey ? JSON.parse(query.lastEvaluatedKey) : undefined,
+      lastEvaluatedKey: query.lastEvaluatedKey
+        ? JSON.parse(query.lastEvaluatedKey)
+        : undefined,
     };
 
     return await this.listLogsUseCase.execute(filters);
@@ -88,9 +104,21 @@ export class LogController {
   @Get('user/:userId')
   @ApiOperation({ summary: 'Obter logs de um usuário específico' })
   @ApiParam({ name: 'userId', description: 'ID do usuário' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Limite de resultados' })
-  @ApiQuery({ name: 'lastEvaluatedKey', required: false, description: 'Chave para paginação' })
-  @ApiResponse({ status: 200, description: 'Logs do usuário obtidos com sucesso', type: [LogResponseDto] })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Limite de resultados',
+  })
+  @ApiQuery({
+    name: 'lastEvaluatedKey',
+    required: false,
+    description: 'Chave para paginação',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logs do usuário obtidos com sucesso',
+    type: [LogResponseDto],
+  })
   async getByUser(
     @Param('userId') userId: string,
     @Query('limit') limit?: number,
@@ -99,16 +127,33 @@ export class LogController {
     logs: LogResponseDto[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    const parsedKey = lastEvaluatedKey ? JSON.parse(lastEvaluatedKey) : undefined;
+    const parsedKey = lastEvaluatedKey
+      ? JSON.parse(lastEvaluatedKey)
+      : undefined;
     return await this.getLogsByUserUseCase.execute(userId, limit, parsedKey);
   }
 
   @Get('level/:level')
   @ApiOperation({ summary: 'Obter logs por nível' })
-  @ApiParam({ name: 'level', description: 'Nível do log (error, warn, info, debug, verbose)' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Limite de resultados' })
-  @ApiQuery({ name: 'lastEvaluatedKey', required: false, description: 'Chave para paginação' })
-  @ApiResponse({ status: 200, description: 'Logs por nível obtidos com sucesso', type: [LogResponseDto] })
+  @ApiParam({
+    name: 'level',
+    description: 'Nível do log (error, warn, info, debug, verbose)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Limite de resultados',
+  })
+  @ApiQuery({
+    name: 'lastEvaluatedKey',
+    required: false,
+    description: 'Chave para paginação',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logs por nível obtidos com sucesso',
+    type: [LogResponseDto],
+  })
   async getByLevel(
     @Param('level') level: string,
     @Query('limit') limit?: number,
@@ -117,7 +162,9 @@ export class LogController {
     logs: LogResponseDto[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    const parsedKey = lastEvaluatedKey ? JSON.parse(lastEvaluatedKey) : undefined;
+    const parsedKey = lastEvaluatedKey
+      ? JSON.parse(lastEvaluatedKey)
+      : undefined;
     return await this.getLogsByLevelUseCase.execute(level, limit, parsedKey);
   }
 
@@ -125,9 +172,21 @@ export class LogController {
   @ApiOperation({ summary: 'Obter logs por intervalo de datas' })
   @ApiQuery({ name: 'startDate', description: 'Data de início (ISO string)' })
   @ApiQuery({ name: 'endDate', description: 'Data de fim (ISO string)' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Limite de resultados' })
-  @ApiQuery({ name: 'lastEvaluatedKey', required: false, description: 'Chave para paginação' })
-  @ApiResponse({ status: 200, description: 'Logs por intervalo de datas obtidos com sucesso', type: [LogResponseDto] })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Limite de resultados',
+  })
+  @ApiQuery({
+    name: 'lastEvaluatedKey',
+    required: false,
+    description: 'Chave para paginação',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Logs por intervalo de datas obtidos com sucesso',
+    type: [LogResponseDto],
+  })
   async getByDateRange(
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
@@ -137,7 +196,9 @@ export class LogController {
     logs: LogResponseDto[];
     lastEvaluatedKey?: Record<string, any>;
   }> {
-    const parsedKey = lastEvaluatedKey ? JSON.parse(lastEvaluatedKey) : undefined;
+    const parsedKey = lastEvaluatedKey
+      ? JSON.parse(lastEvaluatedKey)
+      : undefined;
     return await this.getLogsByDateRangeUseCase.execute(
       startDate,
       endDate,
@@ -150,7 +211,11 @@ export class LogController {
   @ApiOperation({ summary: 'Obter um log específico por ID e timestamp' })
   @ApiParam({ name: 'id', description: 'ID do log' })
   @ApiQuery({ name: 'timestamp', description: 'Timestamp do log (ISO string)' })
-  @ApiResponse({ status: 200, description: 'Log obtido com sucesso', type: LogResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Log obtido com sucesso',
+    type: LogResponseDto,
+  })
   @ApiResponse({ status: 404, description: 'Log não encontrado' })
   async getById(
     @Param('id') id: string,
@@ -162,9 +227,16 @@ export class LogController {
   @Post('cleanup')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Deletar logs antigos' })
-  @ApiResponse({ status: 200, description: 'Logs antigos deletados com sucesso' })
-  async deleteOldLogs(@Body() deleteOldLogsDto: DeleteOldLogsRequestDto): Promise<{ deletedCount: number }> {
-    const deletedCount = await this.deleteOldLogsUseCase.execute(deleteOldLogsDto.olderThan);
+  @ApiResponse({
+    status: 200,
+    description: 'Logs antigos deletados com sucesso',
+  })
+  async deleteOldLogs(
+    @Body() deleteOldLogsDto: DeleteOldLogsRequestDto,
+  ): Promise<{ deletedCount: number }> {
+    const deletedCount = await this.deleteOldLogsUseCase.execute(
+      deleteOldLogsDto.olderThan,
+    );
     return { deletedCount };
   }
 }

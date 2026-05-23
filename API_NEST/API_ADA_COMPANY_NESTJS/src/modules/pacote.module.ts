@@ -2,7 +2,10 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Pacote } from '../infrastructure/database/entities/pacote.entity';
 import { PacoteController } from '../interfaces/http/controllers/pacote.controller';
-import { PacoteRepositoryProvider, PACOTE_REPOSITORY } from '../infrastructure/providers/pacote.provider';
+import {
+  PacoteRepositoryProvider,
+  PACOTE_REPOSITORY,
+} from '../infrastructure/providers/pacote.provider';
 import { CreatePacoteUseCase } from '../application/use-cases/pacote/create-pacote.use-case';
 import { ListPacotesUseCase } from '../application/use-cases/pacote/list-pacotes.use-case';
 import { GetPacoteUseCase } from '../application/use-cases/pacote/get-pacote.use-case';
@@ -23,7 +26,8 @@ import { CLIENTE_REPOSITORY } from '../infrastructure/providers/cliente.provider
     PacoteRepositoryProvider,
     {
       provide: CreatePacoteUseCase,
-      useFactory: (pacoteRepo, clienteRepo) => new CreatePacoteUseCase(pacoteRepo, clienteRepo),
+      useFactory: (pacoteRepo, clienteRepo) =>
+        new CreatePacoteUseCase(pacoteRepo, clienteRepo),
       inject: [PACOTE_REPOSITORY, CLIENTE_REPOSITORY],
     },
     {
@@ -53,7 +57,7 @@ import { CLIENTE_REPOSITORY } from '../infrastructure/providers/cliente.provider
     GetPacoteUseCase,
     UpdatePacoteUseCase,
     DeletePacoteUseCase,
-    PACOTE_REPOSITORY
-  ]
+    PACOTE_REPOSITORY,
+  ],
 })
-export class PacoteModule {} 
+export class PacoteModule {}

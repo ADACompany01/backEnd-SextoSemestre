@@ -14,4 +14,4 @@ export class UpdateClienteUseCase {
     await this.clienteRepository.update(id, data);
     return this.clienteRepository.findById(id);
   }
-} 
+}

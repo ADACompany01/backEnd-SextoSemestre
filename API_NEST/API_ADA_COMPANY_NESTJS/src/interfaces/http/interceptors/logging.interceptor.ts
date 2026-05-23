@@ -37,37 +37,44 @@ export class LoggingInterceptor implements NestInterceptor {
           const statusCode = response.statusCode;
 
           // Log assíncrono para não bloquear a resposta
-          this.loggingService.logHttpRequest(
-            method,
-            url,
-            statusCode,
-            responseTime,
-            userId,
-            userEmail,
-            ip,
-            userAgent,
-          ).catch(error => {
-            console.error('Erro ao logar requisição HTTP:', error);
-          });
+          this.loggingService
+            .logHttpRequest(
+              method,
+              url,
+              statusCode,
+              responseTime,
+              userId,
+              userEmail,
+              ip,
+              userAgent,
+            )
+            .catch((error) => {
+              console.error('Erro ao logar requisição HTTP:', error);
+            });
         },
         error: (error) => {
           const responseTime = Date.now() - startTime;
           const statusCode = error.status || 500;
 
           // Log de erro assíncrono
-          this.loggingService.logHttpRequest(
-            method,
-            url,
-            statusCode,
-            responseTime,
-            userId,
-            userEmail,
-            ip,
-            userAgent,
-            { error: error.message, stack: error.stack },
-          ).catch(logError => {
-            console.error('Erro ao logar requisição HTTP com erro:', logError);
-          });
+          this.loggingService
+            .logHttpRequest(
+              method,
+              url,
+              statusCode,
+              responseTime,
+              userId,
+              userEmail,
+              ip,
+              userAgent,
+              { error: error.message, stack: error.stack },
+            )
+            .catch((logError) => {
+              console.error(
+                'Erro ao logar requisição HTTP com erro:',
+                logError,
+              );
+            });
         },
       }),
     );

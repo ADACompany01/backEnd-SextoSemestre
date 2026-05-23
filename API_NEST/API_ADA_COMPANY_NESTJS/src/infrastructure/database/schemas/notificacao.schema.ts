@@ -32,5 +32,3 @@ export const NotificacaoSchema = SchemaFactory.createForClass(Notificacao);
 // Índices para melhor performance
 NotificacaoSchema.index({ userId: 1, lida: 1 });
 NotificacaoSchema.index({ createdAt: -1 });
-
-
