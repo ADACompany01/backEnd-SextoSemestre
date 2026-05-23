@@ -13,7 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\" --rule '@typescript-eslint/no-unused-vars:off' --rule '@typescript-eslint/no-require-imports:off'"
+    "lint:check": "eslint \"{src,apps,libs,test}/**/*.ts\" --rule '@typescript-eslint/no-unused-vars:off' --rule '@typescript-eslint/no-require-imports:off'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
