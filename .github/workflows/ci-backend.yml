@@ -118,7 +118,11 @@ jobs:
           IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION_WITHOUT_V"
           echo "DEBUG: Versão atual - Major: $MAJOR, Minor: $MINOR, Patch: $PATCH"
           echo "Obtendo commits desde a última tag..."
-          COMMITS_SINCE_LAST_TAG=$(git log "$LAST_TAG..HEAD" --pretty=format:"%s")
+          if git rev-parse "$LAST_TAG" >/dev/null 2>&1; then
+            COMMITS_SINCE_LAST_TAG=$(git log "$LAST_TAG..HEAD" --pretty=format:"%s")
+          else
+            COMMITS_SINCE_LAST_TAG=$(git log HEAD --pretty=format:"%s")
+          fi
           echo "DEBUG: Commits desde '$LAST_TAG':"
           echo "$COMMITS_SINCE_LAST_TAG"
           echo "-----------------------------------"
