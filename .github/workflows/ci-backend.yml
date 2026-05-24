@@ -91,7 +91,7 @@ jobs:
       - name: Checkout do Código com Token para Push
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Fetch todas as tags
