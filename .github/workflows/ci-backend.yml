@@ -230,33 +230,47 @@ jobs:
           fi
           echo "Secrets verificados com sucesso."
 
-      - name: 🚀 Deploy Backend Mobile
-        if: steps.version_step.outputs.NEW_VERSION != '' 
+      - name: 🚀 Deploy Backend + Banco
+        if: steps.version_step.outputs.NEW_VERSION != ''
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
           script: |
-            # Limpeza leve para evitar encher o disco
-            docker system prune -a -f
-            
-            # Garante que a rede exista para conectar ao banco do outro projeto
+            docker image prune -f
+
             docker network create ada-net || true
-            
-            echo "--- Deploy do Backend Mobile ---"
-            docker pull ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
-            
-            # Para e remove SOMENTE o container mobile
-            docker stop api-backend-mobile || true
-            docker rm api-backend-mobile || true
-            
-            echo "Iniciando container do backend mobile..."
+
+            echo "--- Deploy PostgreSQL ---"
+
+            docker pull postgres:latest
+
+            docker stop postgres-db || true
+            docker rm postgres-db || true
+
             docker run -d \
-              --name api-backend-mobile \
+              --name postgres-db \
               --network ada-net \
               --restart always \
-              -p 3001:3001 \
+              -e POSTGRES_USER=${{ secrets.DB_USERNAME }} \
+              -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e POSTGRES_DB=${{ secrets.DB_DATABASE }} \
+              -v pgdata:/var/lib/postgresql/data \
+              postgres:latest
+
+            echo "--- Deploy Backend ---"
+
+            docker pull ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+
+            docker stop api-backend || true
+            docker rm api-backend || true
+
+            docker run -d \
+              --name api-backend \
+              --network ada-net \
+              --restart always \
+              -p 127.0.0.1:3001:3001 \
               -e DB_HOST=postgres-db \
               -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
@@ -268,53 +282,43 @@ jobs:
               -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
               -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
               ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
-
-      - name: 🚀 Deploy Backend e Banco de Dados na Azure VM
-        if: steps.version_step.outputs.NEW_VERSION != ''
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.AZURE_VM_HOST }}
-          username: ${{ secrets.AZURE_VM_USER }}
-          key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
-          script: |
-            docker network create ada-net || true
-
-            echo "--- 1. Deploy do Banco de Dados ---"
-            docker pull postgres:latest
-
-            docker stop postgres-db || true
-            docker rm postgres-db || true
-
-            echo "Iniciando container do banco de dados..."
-            docker run -d \
-              --name postgres-db \
-              --network ada-net \
-              --restart always \
-              -e POSTGRES_USER=${{ secrets.DB_USERNAME }} \
-              -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e POSTGRES_DB=${{ secrets.DB_DATABASE }} \
-              -v pgdata:/var/lib/postgresql/data \
-              postgres:latest
-
-            echo "--- 2. Deploy do Backend ---"
-            sleep 20
-
-            docker pull ${{ secrets.DOCKER_USERNAME }}/ada-company-backend:latest
-
-            docker stop api-backend || true
-            docker rm api-backend || true
-
-            docker run -d \
-              --name api-backend \
-              --network ada-net \
-              --restart always \
-              -p 127.0.0.1:3000:3000 \
-              -e DB_HOST=postgres-db \
-              -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
-              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-              -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
-              -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-              ${{ secrets.DOCKER_USERNAME }}/ada-company-backend:latest
+              if: steps.version_step.outputs.NEW_VERSION != '' 
+              uses: appleboy/ssh-action@master
+              with:
+                host: ${{ secrets.AZURE_VM_HOST }}
+                username: ${{ secrets.AZURE_VM_USER }}
+                key: ${{ secrets.AZURE_VM_PRIVATE_KEY }}
+                script: |
+                  # Limpeza leve para evitar encher o disco
+                  docker system prune -a -f
+                  
+                  # Garante que a rede exista para conectar ao banco do outro projeto
+                  docker network create ada-net || true
+                  
+                  echo "--- Deploy do Backend ---"
+                  docker pull ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+                  
+                  # Para e remove SOMENTE o container backend
+                  docker stop api-backend || true
+                  docker rm api-backend || true
+                  
+                  echo "Iniciando container do backend..."
+                  docker run -d \
+                    --name api-backend  \
+                    --network ada-net \
+                    --restart always \
+                    -p 3001:3001 \
+                    -e DB_HOST=postgres-db \
+                    -e DB_USERNAME=${{ secrets.DB_USERNAME }} \
+                    -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+                    -e DB_DATABASE=${{ secrets.DB_DATABASE }} \
+                    -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+                    -e MONGODB_URI="${{ secrets.MONGODB_URI }}" \
+                    -e CHROME_PATH=/usr/bin/chromium \
+                    -e CHROME_BIN=/usr/bin/chromium \
+                    -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+                    -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+                    ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
 
       - name: Enviar Notificação de Erro (se o job falhar)
         if: failure()
