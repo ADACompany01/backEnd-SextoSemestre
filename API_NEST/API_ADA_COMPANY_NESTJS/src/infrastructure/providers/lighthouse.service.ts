@@ -451,7 +451,8 @@ export class LighthouseService {
 
       // Configurar opções do chrome-launcher
       const launchOptions: any = {
-        logLevel: 'silent', // Reduzir logs do chrome-launcher
+        logLevel: 'silent',
+        port: 9222,
         chromeFlags: [
           '--headless=new',
           '--disable-gpu',
@@ -472,7 +473,6 @@ export class LighthouseService {
           '--single-process',
           '--no-zygote',
           '--remote-debugging-address=127.0.0.1',
-          '--remote-debugging-port=9222',
         ],
       };
 
