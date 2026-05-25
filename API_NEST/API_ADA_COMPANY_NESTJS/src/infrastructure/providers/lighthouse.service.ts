@@ -210,7 +210,7 @@ export class LighthouseService {
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-gpu',
-            '--remote-debugging-address=0.0.0.0',
+            '--remote-debugging-address=127.0.0.1',
           ],
         });
 
@@ -453,7 +453,7 @@ export class LighthouseService {
       const launchOptions: any = {
         logLevel: 'silent', // Reduzir logs do chrome-launcher
         chromeFlags: [
-          '--headless',
+          '--headless=new',
           '--disable-gpu',
           '--no-sandbox',
           '--disable-dev-shm-usage',
@@ -469,6 +469,10 @@ export class LighthouseService {
           '--disable-setuid-sandbox',
           '--disable-crash-reporter',
           '--disable-breakpad',
+          '--single-process',
+          '--no-zygote',
+          '--remote-debugging-address=127.0.0.1',
+          '--remote-debugging-port=9222',
         ],
       };
 
@@ -592,8 +596,10 @@ export class LighthouseService {
         runnerResult.lhr ||
         (typeof reportJson === 'string' ? JSON.parse(reportJson) : reportJson);
       try {
-        await chrome.kill();
-        chrome = null;
+        if (chrome) {
+          await chrome.kill();
+          chrome = null;
+        }
       } catch (killError: any) {
         console.warn(
           `[LighthouseService] Chrome finalizou a análise, mas houve erro ao limpar arquivos temporários: ${killError?.message || killError}`,

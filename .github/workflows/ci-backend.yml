@@ -318,7 +318,7 @@ jobs:
                     -e CHROME_BIN=/usr/bin/chromium \
                     -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
                     -e PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
-                    ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest
+                    ${{ secrets.DOCKER_USERNAME }}/ada-company-backend-mobile:latest       
 
       - name: Enviar Notificação de Erro (se o job falhar)
         if: failure()

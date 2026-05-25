@@ -27,6 +27,8 @@ COPY . .
 # Mantive o legacy-peer-deps para consistência com o seu comando original.
 RUN npm install --legacy-peer-deps --unsafe-perm=true
 
+
+
 # Compila o projeto
 RUN npm run build
 
