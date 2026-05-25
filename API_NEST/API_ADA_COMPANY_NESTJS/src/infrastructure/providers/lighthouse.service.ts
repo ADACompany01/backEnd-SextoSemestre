@@ -207,8 +207,10 @@ export class LighthouseService {
           chromeFlags: [
             '--headless',
             '--no-sandbox',
+            '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-gpu',
+            '--remote-debugging-address=0.0.0.0',
           ],
         });
 
