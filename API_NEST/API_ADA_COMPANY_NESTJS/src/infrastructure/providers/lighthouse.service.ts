@@ -470,8 +470,6 @@ export class LighthouseService {
           '--disable-setuid-sandbox',
           '--disable-crash-reporter',
           '--disable-breakpad',
-          '--single-process',
-          '--no-zygote',
           '--remote-debugging-address=127.0.0.1',
         ],
       };
