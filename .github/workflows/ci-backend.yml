@@ -337,3 +337,4 @@ jobs:
             Por favor, verifique os logs para mais detalhes.
           to: ${{ secrets.MAIL_TO }}
           from: ${{ secrets.MAIL_FROM }}
+
