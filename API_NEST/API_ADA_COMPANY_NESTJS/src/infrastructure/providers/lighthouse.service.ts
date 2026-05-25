@@ -534,26 +534,54 @@ export class LighthouseService {
       throw new Error(`Erro ao iniciar o Chrome: ${errorMessage}`);
     }
 
-    const options: any = {
-      logLevel: 'error', // Reduzir logs para apenas erros
+    const options = {
+      logLevel: 'info',
       output: 'json',
-      port: chrome.port,
       onlyCategories: ['accessibility'],
-      locale: 'pt-BR',
-      maxWaitForLoad: 15000, // Aumentado para 15 segundos para sites mais lentos
-      maxWaitForFcp: 10000, // Timeout para First Contentful Paint aumentado
-      throttling: {
-        rttMs: 40, // Reduzir latência simulada
-        throughputKbps: 10240, // Aumentar throughput
-        cpuSlowdownMultiplier: 1, // Sem desaceleração de CPU
+
+      formFactor: 'desktop',
+
+      screenEmulation: {
+        mobile: false,
+        width: 1366,
+        height: 768,
+        deviceScaleFactor: 1,
+        disabled: false,
       },
+
+      emulatedUserAgent:
+        'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome Safari/537.36',
+
+      throttlingMethod: 'provided',
+
+      disableStorageReset: true,
+
+      maxWaitForLoad: 30000,
+      maxWaitForFcp: 20000,
+
       skipAudits: [
-        // Pular auditorias que não são essenciais para acessibilidade
         'uses-http2',
         'uses-long-cache-ttl',
         'total-byte-weight',
         'dom-size',
+        'bootup-time',
+        'mainthread-work-breakdown',
+        'network-requests',
+        'network-rtt',
+        'network-server-latency',
+        'third-party-summary',
+        'uses-rel-preconnect',
+        'uses-rel-preload',
+        'render-blocking-resources',
+        'unused-javascript',
+        'unused-css-rules',
+        'modern-image-formats',
+        'uses-optimized-images',
+        'uses-responsive-images',
+        'efficient-animated-content',
       ],
+
+      port: chrome.port,
     };
 
     try {
@@ -576,7 +604,7 @@ export class LighthouseService {
               'Timeout: A análise do Lighthouse excedeu o tempo limite de 45 segundos',
             ),
           );
-        }, 45000); // Reduzido para 45 segundos
+        }, 120000); // Reduzido para 45 segundos
       });
 
       const runnerResult = (await Promise.race([
