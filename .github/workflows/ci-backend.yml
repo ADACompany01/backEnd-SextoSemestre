@@ -256,7 +256,7 @@ jobs:
               -e POSTGRES_USER=${{ secrets.DB_USERNAME }} \
               -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e POSTGRES_DB=${{ secrets.DB_DATABASE }} \
-              -v pgdata:/var/lib/postgresql/data \
+              -v pgdata:/var/lib/postgresql \
               postgres:latest
 
             echo "--- Deploy Backend ---"
