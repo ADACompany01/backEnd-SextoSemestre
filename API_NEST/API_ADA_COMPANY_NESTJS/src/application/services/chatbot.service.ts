@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 export interface ChatbotOption {
   id: string;
@@ -24,6 +29,42 @@ export interface ChatbotReply {
   node: ChatbotNode;
   breadcrumb: string[];
 }
+
+export interface ChatbotLlmMessage {
+  message: string;
+  contextTitle?: string;
+  history?: Array<{
+    author: string;
+    text: string;
+  }>;
+}
+
+export interface ChatbotLlmReply {
+  text: string;
+  model: string;
+  provider: 'openai';
+}
+
+interface OpenAIResponsePayload {
+  output_text?: string;
+  output?: Array<{
+    content?: Array<{
+      text?: string;
+      type?: string;
+    }>;
+  }>;
+  error?: {
+    message?: string;
+  };
+}
+
+const ADA_COMPANY_CONTEXT = `
+Empresa: AdaCompany.
+Personagem: Ada, assistente virtual da AdaCompany.
+Atuacao: desenvolvimento de sites acessiveis, sistemas, area do cliente, orcamentos, contratos, suporte, manutencao, integracoes e orientacao em acessibilidade digital.
+Tom: acolhedor, claro, objetivo e profissional.
+Orientacao: responda em portugues do Brasil, como Ada falando diretamente com o cliente. Faca no maximo uma pergunta por resposta quando precisar de mais dados. Nao invente valores, prazos fechados, contratos ou politicas. Quando o cliente pedir orcamento, colete tipo de projeto, objetivo, prazo, recursos desejados e contato. Quando o assunto exigir decisao comercial ou suporte humano, explique que a equipe pode assumir depois com o contexto.
+`;
 
 const CHATBOT_NODES: Record<string, ChatbotNode> = {
   inicio: {
@@ -286,6 +327,8 @@ const CHATBOT_NODES: Record<string, ChatbotNode> = {
 
 @Injectable()
 export class ChatbotService {
+  constructor(private readonly configService: ConfigService) {}
+
   getTree() {
     return {
       rootNodeId: 'inicio',
@@ -307,6 +350,71 @@ export class ChatbotService {
       breadcrumb: selectedOption
         ? [currentNode.title, selectedOption.label]
         : [currentNode.title],
+    };
+  }
+
+  async replyWithLlm(payload: ChatbotLlmMessage): Promise<ChatbotLlmReply> {
+    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    const model =
+      this.configService.get<string>('OPENAI_CHATBOT_MODEL') || 'gpt-5.1';
+
+    if (!apiKey) {
+      throw new ServiceUnavailableException(
+        'OPENAI_API_KEY nao configurada no backend',
+      );
+    }
+
+    const history = (payload.history || [])
+      .slice(-8)
+      .map((message) => `${message.author}: ${message.text}`)
+      .join('\n');
+
+    const context = payload.contextTitle
+      ? `Contexto atual da conversa guiada: ${payload.contextTitle}.`
+      : 'Contexto atual da conversa guiada: contato geral.';
+
+    const response = await fetch('https://api.openai.com/v1/responses', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model,
+        instructions: ADA_COMPANY_CONTEXT,
+        input: [
+          context,
+          history ? `Historico recente:\n${history}` : 'Sem historico recente.',
+          `Mensagem do cliente: ${payload.message}`,
+        ].join('\n\n'),
+      }),
+    });
+
+    const result = (await response.json()) as OpenAIResponsePayload;
+
+    if (!response.ok) {
+      throw new BadGatewayException(
+        result.error?.message || 'Falha ao consultar a OpenAI',
+      );
+    }
+
+    const text =
+      result.output_text ||
+      result.output
+        ?.flatMap((item) => item.content || [])
+        .map((content) => content.text)
+        .filter(Boolean)
+        .join('\n')
+        .trim();
+
+    if (!text) {
+      throw new BadGatewayException('A OpenAI nao retornou texto para a Ada');
+    }
+
+    return {
+      text,
+      model,
+      provider: 'openai',
     };
   }
 }

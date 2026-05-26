@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ChatbotService } from '../../../application/services/chatbot.service';
 import { Public } from '../decorators/public.decorator';
+import { ChatbotLlmMessageDto } from '../dtos/requests/chatbot-llm-message.dto';
 import { ChatbotMessageDto } from '../dtos/requests/chatbot-message.dto';
 
 @ApiTags('chatbot')
@@ -36,6 +37,21 @@ export class ChatbotController {
         chatbotMessageDto.nodeId,
         chatbotMessageDto.optionId,
       ),
+    };
+  }
+
+  @Public()
+  @Post('llm')
+  @ApiOperation({ summary: 'Conversar com a Ada usando OpenAI e PLN' })
+  @ApiResponse({
+    status: 200,
+    description: 'Resposta generativa da Ada retornada com sucesso',
+  })
+  async replyWithLlm(@Body() chatbotLlmMessageDto: ChatbotLlmMessageDto) {
+    return {
+      statusCode: 200,
+      message: 'Resposta generativa da Ada retornada com sucesso',
+      data: await this.chatbotService.replyWithLlm(chatbotLlmMessageDto),
     };
   }
 }
