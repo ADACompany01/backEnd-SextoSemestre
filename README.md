@@ -183,6 +183,89 @@ Para rodar o sistema completo localmente (frontend, backend e banco de dados), b
 
 ---
 
+## Chatbot do Widget e Ada
+
+O backend fornece as rotas usadas pelo widget de atendimento do frontend:
+
+- `GET /api/chatbot/tree`: retorna a árvore de decisão do chatbot guiado.
+- `POST /api/chatbot/message`: processa a opção escolhida pelo usuário na árvore de decisão.
+- `POST /api/chatbot/llm`: recebe mensagens livres da Ada e consulta a OpenAI pela Responses API.
+
+As rotas do chatbot são públicas porque o atendimento inicial acontece antes do login.
+
+### Funcionamento da Ada com OpenAI
+
+Quando o usuário clica em "Conversar com a Ada" no frontend ou chega em uma etapa que antes encaminharia para atendente, o frontend envia a mensagem para `POST /api/chatbot/llm`.
+
+O backend:
+
+1. recebe a mensagem do usuário, o contexto da etapa do widget e o histórico recente;
+2. monta um prompt com informações da AdaCompany;
+3. usa `OPENAI_API_KEY` do ambiente para chamar a OpenAI;
+4. retorna a resposta da Ada para o frontend.
+
+Se `OPENAI_API_KEY` não estiver configurada, o endpoint retorna erro de serviço indisponível. Nesse caso, o frontend usa o fallback local de PLN/ML.
+
+### Variáveis de ambiente
+
+Configure as variáveis no arquivo `.env` da pasta `API_NEST/API_ADA_COMPANY_NESTJS`:
+
+```env
+OPENAI_API_KEY=sua_chave_da_openai
+OPENAI_CHATBOT_ENABLED=true
+OPENAI_CHATBOT_MODEL=gpt-5.4-nano
+OPENAI_CHATBOT_DAILY_LIMIT=50
+OPENAI_CHATBOT_MAX_OUTPUT_TOKENS=300
+```
+
+`OPENAI_CHATBOT_MODEL` é opcional. Se não for informado, o backend usa `gpt-5.4-nano`, um modelo mais econômico para respostas curtas de atendimento.
+
+Para evitar custo com OpenAI, use uma destas opções:
+
+- deixe `OPENAI_API_KEY` vazio;
+- ou configure `OPENAI_CHATBOT_ENABLED=false`.
+
+Nesses casos, o endpoint generativo fica indisponível e o frontend usa o fallback local de PLN/ML.
+
+Para reduzir custo quando a OpenAI estiver ligada:
+
+- use um modelo econômico em `OPENAI_CHATBOT_MODEL`;
+- reduza `OPENAI_CHATBOT_DAILY_LIMIT`;
+- reduza `OPENAI_CHATBOT_MAX_OUTPUT_TOKENS`;
+- acompanhe o uso no painel da OpenAI.
+
+Não coloque a chave da OpenAI no frontend. Ela deve ficar somente no backend.
+
+### Exemplo de requisição
+
+```bash
+curl -X POST http://localhost:3001/api/chatbot/llm \
+  -H "Content-Type: application/json" \
+  -d "{\"message\":\"Quero um orçamento para um site acessível\",\"contextTitle\":\"Falar com Atendente\",\"history\":[]}"
+```
+
+Resposta esperada:
+
+```json
+{
+  "statusCode": 200,
+  "message": "Resposta generativa da Ada retornada com sucesso",
+  "data": {
+    "text": "Claro! Para preparar um orçamento, me conte o tipo de site, objetivo, prazo e recursos desejados.",
+    "model": "gpt-5.4-nano",
+    "provider": "openai"
+  }
+}
+```
+
+### Arquivos principais
+
+- `API_NEST/API_ADA_COMPANY_NESTJS/src/application/services/chatbot.service.ts`
+- `API_NEST/API_ADA_COMPANY_NESTJS/src/interfaces/http/controllers/chatbot.controller.ts`
+- `API_NEST/API_ADA_COMPANY_NESTJS/src/interfaces/http/dtos/requests/chatbot-llm-message.dto.ts`
+
+---
+
 ## Testes
 
 Os testes do backend devem ser executados dentro da pasta da API NestJS:

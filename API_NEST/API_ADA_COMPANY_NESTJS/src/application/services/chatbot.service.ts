@@ -66,6 +66,11 @@ Tom: acolhedor, claro, objetivo e profissional.
 Orientacao: responda em portugues do Brasil, como Ada falando diretamente com o cliente. Faca no maximo uma pergunta por resposta quando precisar de mais dados. Nao invente valores, prazos fechados, contratos ou politicas. Quando o cliente pedir orcamento, colete tipo de projeto, objetivo, prazo, recursos desejados e contato. Quando o assunto exigir decisao comercial ou suporte humano, explique que a equipe pode assumir depois com o contexto.
 `;
 
+interface ChatbotUsageCounter {
+  date: string;
+  requests: number;
+}
+
 const CHATBOT_NODES: Record<string, ChatbotNode> = {
   inicio: {
     id: 'inicio',
@@ -327,6 +332,11 @@ const CHATBOT_NODES: Record<string, ChatbotNode> = {
 
 @Injectable()
 export class ChatbotService {
+  private llmUsageCounter: ChatbotUsageCounter = {
+    date: this.getUsageDate(),
+    requests: 0,
+  };
+
   constructor(private readonly configService: ConfigService) {}
 
   getTree() {
@@ -354,15 +364,26 @@ export class ChatbotService {
   }
 
   async replyWithLlm(payload: ChatbotLlmMessage): Promise<ChatbotLlmReply> {
+    const isEnabled =
+      this.configService.get<string>('OPENAI_CHATBOT_ENABLED') !== 'false';
     const apiKey = this.configService.get<string>('OPENAI_API_KEY');
     const model =
-      this.configService.get<string>('OPENAI_CHATBOT_MODEL') || 'gpt-5.1';
+      this.configService.get<string>('OPENAI_CHATBOT_MODEL') || 'gpt-5.4-nano';
+    const maxOutputTokens = Number(
+      this.configService.get<string>('OPENAI_CHATBOT_MAX_OUTPUT_TOKENS') || 300,
+    );
 
+    if (!isEnabled) {
+      throw new ServiceUnavailableException(
+        'Chatbot com OpenAI desativado no backend',
+      );
+    }
     if (!apiKey) {
       throw new ServiceUnavailableException(
         'OPENAI_API_KEY nao configurada no backend',
       );
     }
+    this.enforceDailyLimit();
 
     const history = (payload.history || [])
       .slice(-8)
@@ -382,6 +403,7 @@ export class ChatbotService {
       body: JSON.stringify({
         model,
         instructions: ADA_COMPANY_CONTEXT,
+        max_output_tokens: maxOutputTokens,
         input: [
           context,
           history ? `Historico recente:\n${history}` : 'Sem historico recente.',
@@ -416,5 +438,31 @@ export class ChatbotService {
       model,
       provider: 'openai',
     };
+  }
+
+  private enforceDailyLimit() {
+    const today = this.getUsageDate();
+    const dailyLimit = Number(
+      this.configService.get<string>('OPENAI_CHATBOT_DAILY_LIMIT') || 50,
+    );
+
+    if (this.llmUsageCounter.date !== today) {
+      this.llmUsageCounter = {
+        date: today,
+        requests: 0,
+      };
+    }
+
+    if (this.llmUsageCounter.requests >= dailyLimit) {
+      throw new ServiceUnavailableException(
+        'Limite diario do chatbot com OpenAI atingido',
+      );
+    }
+
+    this.llmUsageCounter.requests += 1;
+  }
+
+  private getUsageDate() {
+    return new Date().toISOString().slice(0, 10);
   }
 }
