@@ -24,7 +24,10 @@ export class ChatbotController {
   @Public()
   @Post('message')
   @ApiOperation({ summary: 'Processar uma escolha do chatbot' })
-  @ApiResponse({ status: 200, description: 'Resposta do chatbot retornada com sucesso' })
+  @ApiResponse({
+    status: 200,
+    description: 'Resposta do chatbot retornada com sucesso',
+  })
   reply(@Body() chatbotMessageDto: ChatbotMessageDto) {
     return {
       statusCode: 200,
