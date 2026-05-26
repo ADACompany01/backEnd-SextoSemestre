@@ -16,6 +16,7 @@ import { SolicitacaoModule } from './modules/solicitacao.module';
 import { LighthouseModule } from './modules/lighthouse.module';
 import { LogModule } from './modules/log.module';
 import { NotificacaoModule } from './modules/notificacao.module';
+import { ChatbotModule } from './modules/chatbot.module';
 import { JwtAuthGuard } from './interfaces/http/guards/jwt-auth.guard';
 import { CustomThrottlerGuard } from './interfaces/http/guards/custom-throttler.guard';
 
@@ -66,6 +67,7 @@ import { CustomThrottlerGuard } from './interfaces/http/guards/custom-throttler.
     LighthouseModule,
     LogModule,
     NotificacaoModule,
+    ChatbotModule,
   ],
   // controllers: [TestController],
   providers: [
