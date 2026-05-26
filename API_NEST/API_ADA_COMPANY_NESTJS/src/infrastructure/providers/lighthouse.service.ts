@@ -534,7 +534,7 @@ export class LighthouseService {
       throw new Error(`Erro ao iniciar o Chrome: ${errorMessage}`);
     }
 
-    const options = {
+    const options: any = {
       logLevel: 'info',
       output: 'json',
       onlyCategories: ['accessibility'],
