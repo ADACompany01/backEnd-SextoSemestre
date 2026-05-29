@@ -593,3 +593,41 @@ Para dúvidas ou problemas:
 - Abra uma issue no repositório correspondente
 - Entre em contato com a equipe de desenvolvimento
 - Consulte a documentação da API em `/docs` (Swagger)
+
+---
+
+## Testes Robot Framework
+
+Os testes locais de API ficam em `robot/tests` e usam Robot Framework com RequestsLibrary.
+
+Pre-requisitos:
+
+- Python instalado e disponivel no PATH
+- API NestJS rodando localmente na porta 3001
+
+Instalacao das dependencias:
+
+```bash
+pip install -r robot-requirements.txt
+```
+
+Subir o backend:
+
+```bash
+cd API_NEST/API_ADA_COMPANY_NESTJS
+npm run start:dev
+```
+
+Executar os testes a partir da raiz do repositorio backend:
+
+```bash
+robot -d robot/results robot/tests
+```
+
+Executar apontando para outra URL:
+
+```bash
+robot -d robot/results -v API_BASE_URL:http://localhost:3001/api robot/tests
+```
+
+Ao final da execucao, o Robot gera `log.html`, `report.html` e `output.xml` dentro de `robot/results`.
