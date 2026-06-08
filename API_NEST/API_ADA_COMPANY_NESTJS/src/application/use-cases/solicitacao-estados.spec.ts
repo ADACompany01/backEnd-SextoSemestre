@@ -39,8 +39,12 @@ const repo = (overrides: Record<string, jest.Mock> = {}) => ({
 function makeUpdateUseCase(fromStatus: string, toStatus: string) {
   return new UpdateSolicitacaoUseCase(
     repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', status: fromStatus }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-1', status: toStatus }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-1', status: fromStatus }),
+      update: jest
+        .fn()
+        .mockResolvedValue([1, [{ id_solicitacao: 's-1', status: toStatus }]]),
     }) as any,
   );
 }
@@ -57,7 +61,9 @@ describe('Máquina de Estados — Cobertura de Estados', () => {
    */
   it('TC-EST-01: estado inicial PENDENTE ao criar solicitação', async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-est01', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-est01', status: 'PENDENTE' }),
     });
     const clienteRepo = repo({
       findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
@@ -80,9 +86,12 @@ describe('Máquina de Estados — Cobertura de Estados', () => {
    * A solicitação pode ser atualizada para EM_ANALISE pelo funcionário.
    */
   it('TC-EST-02: estado EM_ANALISE alcançável via atualização', async () => {
-    const result = await makeUpdateUseCase('PENDENTE', 'EM_ANALISE').execute('s-1', {
-      status: 'EM_ANALISE',
-    } as any);
+    const result = await makeUpdateUseCase('PENDENTE', 'EM_ANALISE').execute(
+      's-1',
+      {
+        status: 'EM_ANALISE',
+      } as any,
+    );
 
     expect(result).toMatchObject({ status: 'EM_ANALISE' });
   });
@@ -102,8 +111,12 @@ describe('Máquina de Estados — Cobertura de Estados', () => {
       }),
       update: jest.fn(),
     });
-    const createPacoteUseCase = { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }) };
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-est03' }) };
+    const createPacoteUseCase = {
+      execute: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }),
+    };
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-est03' }),
+    };
 
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepo as any,
@@ -124,7 +137,10 @@ describe('Máquina de Estados — Cobertura de Estados', () => {
    * A solicitação pode ser atualizada para ORCAMENTO_APROVADO pelo cliente.
    */
   it('TC-EST-04: estado ORCAMENTO_APROVADO alcançável via atualização', async () => {
-    const result = await makeUpdateUseCase('ORCAMENTO_CRIADO', 'ORCAMENTO_APROVADO').execute('s-1', {
+    const result = await makeUpdateUseCase(
+      'ORCAMENTO_CRIADO',
+      'ORCAMENTO_APROVADO',
+    ).execute('s-1', {
       status: 'ORCAMENTO_APROVADO',
     } as any);
 
@@ -137,9 +153,12 @@ describe('Máquina de Estados — Cobertura de Estados', () => {
    * A solicitação pode ser cancelada em qualquer etapa.
    */
   it('TC-EST-05: estado CANCELADA alcançável via atualização', async () => {
-    const result = await makeUpdateUseCase('PENDENTE', 'CANCELADA').execute('s-1', {
-      status: 'CANCELADA',
-    } as any);
+    const result = await makeUpdateUseCase('PENDENTE', 'CANCELADA').execute(
+      's-1',
+      {
+        status: 'CANCELADA',
+      } as any,
+    );
 
     expect(result).toMatchObject({ status: 'CANCELADA' });
   });
@@ -157,7 +176,9 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
    */
   it('TC-TR-01: [inicial] → PENDENTE ao criar solicitação', async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-tr01', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-tr01', status: 'PENDENTE' }),
     });
     const clienteRepo = repo({
       findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
@@ -178,11 +199,20 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
    */
   it('TC-TR-02: PENDENTE → EM_ANALISE quando funcionário inicia análise', async () => {
     const repository = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-tr02', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-tr02', status: 'EM_ANALISE' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-tr02', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-tr02', status: 'EM_ANALISE' }],
+        ]),
     });
 
-    const result = await new UpdateSolicitacaoUseCase(repository as any).execute('s-tr02', {
+    const result = await new UpdateSolicitacaoUseCase(
+      repository as any,
+    ).execute('s-tr02', {
       status: 'EM_ANALISE',
     } as any);
 
@@ -208,8 +238,12 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
       }),
       update: jest.fn(),
     });
-    const createPacoteUseCase = { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-tr03' }) };
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-tr03' }) };
+    const createPacoteUseCase = {
+      execute: jest.fn().mockResolvedValue({ id_pacote: 'p-tr03' }),
+    };
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-tr03' }),
+    };
 
     const result = await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepo as any,
@@ -232,13 +266,21 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
    */
   it('TC-TR-04: ORCAMENTO_CRIADO → ORCAMENTO_APROVADO quando cliente aprova', async () => {
     const repository = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-tr04', status: 'ORCAMENTO_CRIADO' }),
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-tr04',
+        status: 'ORCAMENTO_CRIADO',
+      }),
       update: jest
         .fn()
-        .mockResolvedValue([1, [{ id_solicitacao: 's-tr04', status: 'ORCAMENTO_APROVADO' }]]),
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-tr04', status: 'ORCAMENTO_APROVADO' }],
+        ]),
     });
 
-    const result = await new UpdateSolicitacaoUseCase(repository as any).execute('s-tr04', {
+    const result = await new UpdateSolicitacaoUseCase(
+      repository as any,
+    ).execute('s-tr04', {
       status: 'ORCAMENTO_APROVADO',
     } as any);
 
@@ -252,11 +294,20 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
    */
   it('TC-TR-05: PENDENTE → CANCELADA quando cliente cancela antes da análise', async () => {
     const repository = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-tr05', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-tr05', status: 'CANCELADA' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-tr05', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-tr05', status: 'CANCELADA' }],
+        ]),
     });
 
-    const result = await new UpdateSolicitacaoUseCase(repository as any).execute('s-tr05', {
+    const result = await new UpdateSolicitacaoUseCase(
+      repository as any,
+    ).execute('s-tr05', {
       status: 'CANCELADA',
     } as any);
 
@@ -270,11 +321,21 @@ describe('Máquina de Estados — Cobertura de Transições', () => {
    */
   it('TC-TR-06: ORCAMENTO_CRIADO → CANCELADA quando cliente rejeita orçamento', async () => {
     const repository = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-tr06', status: 'ORCAMENTO_CRIADO' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-tr06', status: 'CANCELADA' }]]),
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-tr06',
+        status: 'ORCAMENTO_CRIADO',
+      }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-tr06', status: 'CANCELADA' }],
+        ]),
     });
 
-    const result = await new UpdateSolicitacaoUseCase(repository as any).execute('s-tr06', {
+    const result = await new UpdateSolicitacaoUseCase(
+      repository as any,
+    ).execute('s-tr06', {
       status: 'CANCELADA',
     } as any);
 
@@ -297,23 +358,36 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
 
     // Passo 1: Criar solicitação (PENDENTE)
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 'path-01', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-01', status: 'PENDENTE' }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const criada = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://path01.com', tipo_pacote: 'AA' } as any,
-    );
+    const criada = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://path01.com', tipo_pacote: 'AA' } as any);
     estados.push(criada.status);
     expect(criada.status).toBe('PENDENTE');
 
     // Passo 2: Iniciar análise (EM_ANALISE)
     const repoAnalise = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-01', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-01', status: 'EM_ANALISE' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-01', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-01', status: 'EM_ANALISE' }],
+        ]),
     });
-    const emAnalise = await new UpdateSolicitacaoUseCase(repoAnalise as any).execute('path-01', {
+    const emAnalise = await new UpdateSolicitacaoUseCase(
+      repoAnalise as any,
+    ).execute('path-01', {
       status: 'EM_ANALISE',
     } as any);
     estados.push(emAnalise.status);
@@ -331,8 +405,12 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
     });
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepoOrc as any,
-      { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-path01' }) } as any,
-      { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-path01' }) } as any,
+      {
+        execute: jest.fn().mockResolvedValue({ id_pacote: 'p-path01' }),
+      } as any,
+      {
+        execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-path01' }),
+      } as any,
       repo() as any,
     ).execute('path-01');
     expect(solicitacaoRepoOrc.update).toHaveBeenCalledWith(
@@ -343,19 +421,32 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
 
     // Passo 4: Aprovar orçamento (ORCAMENTO_APROVADO)
     const repoAprovacao = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-01', status: 'ORCAMENTO_CRIADO' }),
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 'path-01',
+        status: 'ORCAMENTO_CRIADO',
+      }),
       update: jest
         .fn()
-        .mockResolvedValue([1, [{ id_solicitacao: 'path-01', status: 'ORCAMENTO_APROVADO' }]]),
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-01', status: 'ORCAMENTO_APROVADO' }],
+        ]),
     });
-    const aprovada = await new UpdateSolicitacaoUseCase(repoAprovacao as any).execute('path-01', {
+    const aprovada = await new UpdateSolicitacaoUseCase(
+      repoAprovacao as any,
+    ).execute('path-01', {
       status: 'ORCAMENTO_APROVADO',
     } as any);
     estados.push(aprovada.status);
     expect(aprovada.status).toBe('ORCAMENTO_APROVADO');
 
     // Verificar sequência completa do caminho
-    expect(estados).toEqual(['PENDENTE', 'EM_ANALISE', 'ORCAMENTO_CRIADO', 'ORCAMENTO_APROVADO']);
+    expect(estados).toEqual([
+      'PENDENTE',
+      'EM_ANALISE',
+      'ORCAMENTO_CRIADO',
+      'ORCAMENTO_APROVADO',
+    ]);
   });
 
   /**
@@ -368,22 +459,35 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
 
     // Passo 1: Criar solicitação (PENDENTE)
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 'path-02', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-02', status: 'PENDENTE' }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const criada = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://path02.com', tipo_pacote: 'A' } as any,
-    );
+    const criada = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://path02.com', tipo_pacote: 'A' } as any);
     estados.push(criada.status);
 
     // Passo 2: Cancelar imediatamente (CANCELADA)
     const repoCancelamento = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-02', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-02', status: 'CANCELADA' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-02', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-02', status: 'CANCELADA' }],
+        ]),
     });
-    const cancelada = await new UpdateSolicitacaoUseCase(repoCancelamento as any).execute('path-02', {
+    const cancelada = await new UpdateSolicitacaoUseCase(
+      repoCancelamento as any,
+    ).execute('path-02', {
       status: 'CANCELADA',
     } as any);
     estados.push(cancelada.status);
@@ -402,32 +506,54 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
 
     // Passo 1: PENDENTE
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 'path-03', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-03', status: 'PENDENTE' }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const criada = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://path03.com', tipo_pacote: 'AAA' } as any,
-    );
+    const criada = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://path03.com', tipo_pacote: 'AAA' } as any);
     estados.push(criada.status);
 
     // Passo 2: EM_ANALISE
     const repoAnalise = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-03', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-03', status: 'EM_ANALISE' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-03', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-03', status: 'EM_ANALISE' }],
+        ]),
     });
-    const emAnalise = await new UpdateSolicitacaoUseCase(repoAnalise as any).execute('path-03', {
+    const emAnalise = await new UpdateSolicitacaoUseCase(
+      repoAnalise as any,
+    ).execute('path-03', {
       status: 'EM_ANALISE',
     } as any);
     estados.push(emAnalise.status);
 
     // Passo 3: CANCELADA
     const repoCancelamento = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-03', status: 'EM_ANALISE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-03', status: 'CANCELADA' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-03', status: 'EM_ANALISE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-03', status: 'CANCELADA' }],
+        ]),
     });
-    const cancelada = await new UpdateSolicitacaoUseCase(repoCancelamento as any).execute('path-03', {
+    const cancelada = await new UpdateSolicitacaoUseCase(
+      repoCancelamento as any,
+    ).execute('path-03', {
       status: 'CANCELADA',
     } as any);
     estados.push(cancelada.status);
@@ -445,22 +571,35 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
 
     // Passo 1: PENDENTE
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 'path-04', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-04', status: 'PENDENTE' }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const criada = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://path04.com', tipo_pacote: 'AA' } as any,
-    );
+    const criada = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://path04.com', tipo_pacote: 'AA' } as any);
     estados.push(criada.status);
 
     // Passo 2: EM_ANALISE
     const repoAnalise = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-04', status: 'PENDENTE' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-04', status: 'EM_ANALISE' }]]),
+      findById: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 'path-04', status: 'PENDENTE' }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-04', status: 'EM_ANALISE' }],
+        ]),
     });
-    const emAnalise = await new UpdateSolicitacaoUseCase(repoAnalise as any).execute('path-04', {
+    const emAnalise = await new UpdateSolicitacaoUseCase(
+      repoAnalise as any,
+    ).execute('path-04', {
       status: 'EM_ANALISE',
     } as any);
     estados.push(emAnalise.status);
@@ -477,23 +616,42 @@ describe('Máquina de Estados — Cobertura de Caminhos', () => {
     });
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepoOrc as any,
-      { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-path04' }) } as any,
-      { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-path04' }) } as any,
+      {
+        execute: jest.fn().mockResolvedValue({ id_pacote: 'p-path04' }),
+      } as any,
+      {
+        execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-path04' }),
+      } as any,
       repo() as any,
     ).execute('path-04');
     estados.push('ORCAMENTO_CRIADO');
 
     // Passo 4: CANCELADA (cliente rejeita)
     const repoCancelamento = repo({
-      findById: jest.fn().mockResolvedValue({ id_solicitacao: 'path-04', status: 'ORCAMENTO_CRIADO' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 'path-04', status: 'CANCELADA' }]]),
+      findById: jest.fn().mockResolvedValue({
+        id_solicitacao: 'path-04',
+        status: 'ORCAMENTO_CRIADO',
+      }),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 'path-04', status: 'CANCELADA' }],
+        ]),
     });
-    const cancelada = await new UpdateSolicitacaoUseCase(repoCancelamento as any).execute('path-04', {
+    const cancelada = await new UpdateSolicitacaoUseCase(
+      repoCancelamento as any,
+    ).execute('path-04', {
       status: 'CANCELADA',
     } as any);
     estados.push(cancelada.status);
 
-    expect(estados).toEqual(['PENDENTE', 'EM_ANALISE', 'ORCAMENTO_CRIADO', 'CANCELADA']);
+    expect(estados).toEqual([
+      'PENDENTE',
+      'EM_ANALISE',
+      'ORCAMENTO_CRIADO',
+      'CANCELADA',
+    ]);
     expect(cancelada.status).toBe('CANCELADA');
   });
 

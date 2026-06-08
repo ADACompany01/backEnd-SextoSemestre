@@ -8,7 +8,11 @@
  * Referência: PLANO_DE_TESTES.md — Seções 8, 9 e 10
  */
 
-import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateClienteUseCase } from './cliente/create-cliente.use-case';
 import { CreateOrcamentoUseCase } from './orcamento/create-orcamento.use-case';
 import { CreateOrcamentoFromSolicitacaoUseCase } from './solicitacao/create-orcamento-from-solicitacao.use-case';
@@ -44,7 +48,9 @@ describe('Caixa Preta — CreateSolicitacaoUseCase (Partição de Equivalência)
    */
   it('TC-CB-01 | PE-SOL-01: cria solicitação quando cliente existe (partição válida)', async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-1', status: 'PENDENTE' }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ id_solicitacao: 's-1', status: 'PENDENTE' }),
     });
     const clienteRepo = repo({
       findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
@@ -80,14 +86,20 @@ describe('Caixa Preta — CreateSolicitacaoUseCase (Partição de Equivalência)
    */
   it("TC-CB-03 | PE-SOL-03: cria solicitação com tipo_pacote 'A' (partição válida)", async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-2', status: 'PENDENTE', tipo_pacote: 'A' }),
+      create: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-2',
+        status: 'PENDENTE',
+        tipo_pacote: 'A',
+      }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const result = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://a.com', tipo_pacote: 'A' } as any,
-    );
+    const result = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://a.com', tipo_pacote: 'A' } as any);
 
     expect(result).toMatchObject({ status: 'PENDENTE' });
   });
@@ -98,14 +110,20 @@ describe('Caixa Preta — CreateSolicitacaoUseCase (Partição de Equivalência)
    */
   it("TC-CB-04 | PE-SOL-04: cria solicitação com tipo_pacote 'AA' (partição válida)", async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-3', status: 'PENDENTE', tipo_pacote: 'AA' }),
+      create: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-3',
+        status: 'PENDENTE',
+        tipo_pacote: 'AA',
+      }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const result = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://aa.com', tipo_pacote: 'AA' } as any,
-    );
+    const result = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://aa.com', tipo_pacote: 'AA' } as any);
 
     expect(result).toMatchObject({ tipo_pacote: 'AA' });
   });
@@ -116,14 +134,20 @@ describe('Caixa Preta — CreateSolicitacaoUseCase (Partição de Equivalência)
    */
   it("TC-CB-05 | PE-SOL-05: cria solicitação com tipo_pacote 'AAA' (partição válida)", async () => {
     const solicitacaoRepo = repo({
-      create: jest.fn().mockResolvedValue({ id_solicitacao: 's-4', status: 'PENDENTE', tipo_pacote: 'AAA' }),
+      create: jest.fn().mockResolvedValue({
+        id_solicitacao: 's-4',
+        status: 'PENDENTE',
+        tipo_pacote: 'AAA',
+      }),
     });
-    const clienteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }) });
+    const clienteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_cliente: 'c-1' }),
+    });
 
-    const result = await new CreateSolicitacaoUseCase(solicitacaoRepo as any, clienteRepo as any).execute(
-      'c-1',
-      { site: 'https://aaa.com', tipo_pacote: 'AAA' } as any,
-    );
+    const result = await new CreateSolicitacaoUseCase(
+      solicitacaoRepo as any,
+      clienteRepo as any,
+    ).execute('c-1', { site: 'https://aaa.com', tipo_pacote: 'AAA' } as any);
 
     expect(result).toMatchObject({ tipo_pacote: 'AAA' });
   });
@@ -156,11 +180,17 @@ describe('Caixa Preta — CreateClienteUseCase (Partição de Equivalência)', (
       create: jest.fn().mockResolvedValue({ id_usuario: 'u-1' }),
     });
 
-    const result = await new CreateClienteUseCase(clienteRepo as any, usuarioRepo as any).execute(dto);
+    const result = await new CreateClienteUseCase(
+      clienteRepo as any,
+      usuarioRepo as any,
+    ).execute(dto);
 
     expect(result).toMatchObject({ id_cliente: 'c-new' });
     expect(usuarioRepo.create).toHaveBeenCalledWith(
-      expect.objectContaining({ senha: 'hash-seguro', tipo_usuario: 'cliente' }),
+      expect.objectContaining({
+        senha: 'hash-seguro',
+        tipo_usuario: 'cliente',
+      }),
     );
   });
 
@@ -172,7 +202,11 @@ describe('Caixa Preta — CreateClienteUseCase (Partição de Equivalência)', (
     await expect(
       new CreateClienteUseCase(
         repo() as any,
-        repo({ findByEmail: jest.fn().mockResolvedValue({ id_usuario: 'u-existente' }) }) as any,
+        repo({
+          findByEmail: jest
+            .fn()
+            .mockResolvedValue({ id_usuario: 'u-existente' }),
+        }) as any,
       ).execute(dto),
     ).rejects.toBeInstanceOf(HttpException);
   });
@@ -185,7 +219,11 @@ describe('Caixa Preta — CreateClienteUseCase (Partição de Equivalência)', (
     await expect(
       new CreateClienteUseCase(
         repo() as any,
-        repo({ findByEmail: jest.fn().mockRejectedValue(new Error('conexão perdida')) }) as any,
+        repo({
+          findByEmail: jest
+            .fn()
+            .mockRejectedValue(new Error('conexão perdida')),
+        }) as any,
       ).execute(dto),
     ).rejects.toMatchObject({ status: 500 });
   });
@@ -204,7 +242,10 @@ describe('Caixa Preta — CreateClienteUseCase (Partição de Equivalência)', (
       create: jest.fn().mockResolvedValue({ id_usuario: 'u-sec' }),
     });
 
-    await new CreateClienteUseCase(clienteRepo as any, usuarioRepo as any).execute(dto);
+    await new CreateClienteUseCase(
+      clienteRepo as any,
+      usuarioRepo as any,
+    ).execute(dto);
 
     const chamada = usuarioRepo.create.mock.calls[0][0];
     expect(chamada.senha).not.toBe(dto.senha);
@@ -226,11 +267,18 @@ describe('Caixa Preta — CreateOrcamentoUseCase (Partição de Equivalência + 
 
     const orcamentoRepo = repo({
       findByPacote: jest.fn().mockResolvedValue(null),
-      create: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1', valor_orcamento: 1500 }),
+      create: jest
+        .fn()
+        .mockResolvedValue({ cod_orcamento: 'o-1', valor_orcamento: 1500 }),
     });
-    const pacoteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }) });
+    const pacoteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }),
+    });
 
-    const result = await new CreateOrcamentoUseCase(orcamentoRepo as any, pacoteRepo as any).execute({
+    const result = await new CreateOrcamentoUseCase(
+      orcamentoRepo as any,
+      pacoteRepo as any,
+    ).execute({
       id_pacote: 'p-1',
       valor_orcamento: 1500,
     } as any);
@@ -252,9 +300,14 @@ describe('Caixa Preta — CreateOrcamentoUseCase (Partição de Equivalência + 
       findByPacote: jest.fn().mockResolvedValue(null),
       create: jest.fn().mockResolvedValue({ cod_orcamento: 'o-val' }),
     });
-    const pacoteRepo = repo({ findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }) });
+    const pacoteRepo = repo({
+      findById: jest.fn().mockResolvedValue({ id_pacote: 'p-1' }),
+    });
 
-    await new CreateOrcamentoUseCase(orcamentoRepo as any, pacoteRepo as any).execute({
+    await new CreateOrcamentoUseCase(
+      orcamentoRepo as any,
+      pacoteRepo as any,
+    ).execute({
       id_pacote: 'p-1',
     } as any);
 
@@ -272,11 +325,16 @@ describe('Caixa Preta — CreateOrcamentoUseCase (Partição de Equivalência + 
    * Partição INVÁLIDA: pacote inexistente → NotFoundException
    */
   it('TC-CB-10 | PE-ORC-02: lança NotFoundException quando pacote não existe (partição inválida)', async () => {
-    const orcamentoRepo = repo({ findByPacote: jest.fn().mockResolvedValue(null) });
+    const orcamentoRepo = repo({
+      findByPacote: jest.fn().mockResolvedValue(null),
+    });
     const pacoteRepo = repo({ findById: jest.fn().mockResolvedValue(null) });
 
     await expect(
-      new CreateOrcamentoUseCase(orcamentoRepo as any, pacoteRepo as any).execute({ id_pacote: 'p-x' } as any),
+      new CreateOrcamentoUseCase(
+        orcamentoRepo as any,
+        pacoteRepo as any,
+      ).execute({ id_pacote: 'p-x' } as any),
     ).rejects.toBeInstanceOf(NotFoundException);
   });
 
@@ -286,11 +344,15 @@ describe('Caixa Preta — CreateOrcamentoUseCase (Partição de Equivalência + 
    */
   it('TC-CB-11 | PE-ORC-03: lança ConflictException para orçamento duplicado (partição inválida)', async () => {
     const orcamentoRepo = repo({
-      findByPacote: jest.fn().mockResolvedValue({ cod_orcamento: 'o-existente' }),
+      findByPacote: jest
+        .fn()
+        .mockResolvedValue({ cod_orcamento: 'o-existente' }),
     });
 
     await expect(
-      new CreateOrcamentoUseCase(orcamentoRepo as any, repo() as any).execute({ id_pacote: 'p-1' } as any),
+      new CreateOrcamentoUseCase(orcamentoRepo as any, repo() as any).execute({
+        id_pacote: 'p-1',
+      } as any),
     ).rejects.toBeInstanceOf(ConflictException);
   });
 });
@@ -309,8 +371,12 @@ describe('Caixa Preta — CreateOrcamentoFromSolicitacaoUseCase (Análise de Val
       }),
       update: jest.fn(),
     });
-    const createPacoteUseCase = { execute: jest.fn().mockResolvedValue({ id_pacote: 'p-novo' }) };
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
+    const createPacoteUseCase = {
+      execute: jest.fn().mockResolvedValue({ id_pacote: 'p-novo' }),
+    };
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
 
     return { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase };
   };
@@ -320,7 +386,8 @@ describe('Caixa Preta — CreateOrcamentoFromSolicitacaoUseCase (Análise de Val
    * Valor Limite INFERIOR: tipo 'A' → valor base = R$ 1.000 (mínimo)
    */
   it("TC-CB-13 | VL-01: tipo 'A' gera valor base R$ 1.000 (limite inferior)", async () => {
-    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } = buildUseCase('A');
+    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } =
+      buildUseCase('A');
 
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepo as any,
@@ -339,7 +406,8 @@ describe('Caixa Preta — CreateOrcamentoFromSolicitacaoUseCase (Análise de Val
    * Valor Central: tipo 'AA' → valor base = R$ 1.500
    */
   it("TC-CB-14 | VL-02: tipo 'AA' gera valor base R$ 1.500 (valor central)", async () => {
-    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } = buildUseCase('AA');
+    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } =
+      buildUseCase('AA');
 
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepo as any,
@@ -358,7 +426,8 @@ describe('Caixa Preta — CreateOrcamentoFromSolicitacaoUseCase (Análise de Val
    * Valor Limite SUPERIOR: tipo 'AAA' → valor base = R$ 2.000 (máximo)
    */
   it("TC-CB-15 | VL-03: tipo 'AAA' gera valor base R$ 2.000 (limite superior)", async () => {
-    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } = buildUseCase('AAA');
+    const { solicitacaoRepo, createPacoteUseCase, createOrcamentoUseCase } =
+      buildUseCase('AAA');
 
     await new CreateOrcamentoFromSolicitacaoUseCase(
       solicitacaoRepo as any,
@@ -386,7 +455,9 @@ describe('Caixa Preta — CreateOrcamentoFromSolicitacaoUseCase (Análise de Val
       }),
       update: jest.fn(),
     });
-    const createOrcamentoUseCase = { execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }) };
+    const createOrcamentoUseCase = {
+      execute: jest.fn().mockResolvedValue({ cod_orcamento: 'o-1' }),
+    };
     const pacoteRepo = repo({ findById: jest.fn().mockResolvedValue(null) });
 
     await new CreateOrcamentoFromSolicitacaoUseCase(
@@ -414,10 +485,17 @@ describe('Caixa Preta — UpdateSolicitacaoUseCase (Partição de Equivalência)
   it('TC-CB-17 | PE-UPD-01: atualiza solicitação existente e retorna linha afetada (partição válida)', async () => {
     const repository = repo({
       findById: jest.fn().mockResolvedValue({ id_solicitacao: 's-1' }),
-      update: jest.fn().mockResolvedValue([1, [{ id_solicitacao: 's-1', status: 'EM_ANALISE' }]]),
+      update: jest
+        .fn()
+        .mockResolvedValue([
+          1,
+          [{ id_solicitacao: 's-1', status: 'EM_ANALISE' }],
+        ]),
     });
 
-    const result = await new UpdateSolicitacaoUseCase(repository as any).execute('s-1', {
+    const result = await new UpdateSolicitacaoUseCase(
+      repository as any,
+    ).execute('s-1', {
       status: 'EM_ANALISE',
     } as any);
 
