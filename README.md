@@ -5,8 +5,9 @@
 # ADA Company - Projeto Final
 
 <p align="center">
-  <a href="https://newadacompany-3drnxk22f-ada-companys-projects.vercel.app/"><img src="https://img.shields.io/badge/Frontend-Online-green" /></a>
-  <a href="https://backend-adacompany.onrender.com/"><img src="https://img.shields.io/badge/Backend-Online-blue" /></a>
+  <a href="http://apiadacompany.duckdns.org:8080"><img src="https://img.shields.io/badge/Frontend-Online-green" /></a>
+  <a href="http://apiadacompany.duckdns.org/api"><img src="https://img.shields.io/badge/Backend-Online-blue" /></a>
+  <a href="http://apiadacompany.duckdns.org/api"><img src="https://img.shields.io/badge/Deploy-Azure%20VM-0078D4" /></a>
 </p>
 
 ---
@@ -124,11 +125,13 @@ Sistema completo para gestão de serviços, clientes e funcionários, com interf
 
 ## 🚀 Tecnologias Utilizadas
 
-- **Frontend:** React Native + Expo, TypeScript, SQLite
-- **Backend:** NestJS, TypeScript, Sequelize, JWT, Swagger
-- **Banco de Dados:** PostgreSQL + DynamoDB + SQLite
-- **Infraestrutura:** Docker, Docker Compose
-- **Ferramentas:** Git, GitHub, AWS, Render
+- **Frontend:** React + Vite, TypeScript, CSS Modules, Nginx
+- **Backend:** NestJS 11, TypeScript, Sequelize, JWT, Swagger
+- **Banco de Dados:** PostgreSQL 15 + MongoDB 7 + AWS DynamoDB (logs)
+- **PLN / IA:** Web Speech API (reconhecimento de voz), OpenAI API (chatbot Ada)
+- **Acessibilidade:** Google Lighthouse 12 (auditoria WCAG)
+- **Infraestrutura:** Docker, Docker Compose, Azure VM
+- **Ferramentas:** Git, GitHub Actions (CI/CD), Docker Hub
 
 ---
 
@@ -175,11 +178,12 @@ Para rodar o sistema completo localmente (frontend, backend e banco de dados), b
    docker-compose up --build
    ```
 
-- O backend (Swagger) estará em: [http://localhost:3000/api](http://localhost:3000/api)
+- O backend (Swagger) estará em: [http://localhost:3001/api](http://localhost:3001/api)
 
 > **Observação:**
-> - Não é necessário criar arquivos `.env` para rodar via Docker, pois todas as variáveis já estão no `docker-compose.yml`.
-> - O compose já está ajustado para facilitar o uso local.
+> - Crie um arquivo `.env` em `API_NEST/API_ADA_COMPANY_NESTJS` a partir do `.env.example` com suas credenciais.
+> - As variáveis obrigatórias são: `DB_HOST`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `MONGODB_URI`, `JWT_SECRET`.
+> - Para habilitar o chatbot Ada com OpenAI, configure também `OPENAI_API_KEY`.
 
 ---
 
@@ -204,7 +208,7 @@ O backend:
 3. usa `OPENAI_API_KEY` do ambiente para chamar a OpenAI;
 4. retorna a resposta da Ada para o frontend.
 
-Se `OPENAI_API_KEY` não estiver configurada, o endpoint retorna erro de serviço indisponível. Nesse caso, o frontend usa o fallback local de PLN/ML.
+Se `OPENAI_API_KEY` não estiver configurada ou `OPENAI_CHATBOT_ENABLED=false`, o endpoint retorna erro de serviço indisponível. Nesse caso, o frontend (`src/services/adaNlpChatbot.js`) aplica um fallback local com PLN básico (normalização, tokenização, remoção de stopwords e classificação de intenções por exemplos).
 
 ### Variáveis de ambiente
 
@@ -225,7 +229,7 @@ Para evitar custo com OpenAI, use uma destas opções:
 - deixe `OPENAI_API_KEY` vazio;
 - ou configure `OPENAI_CHATBOT_ENABLED=false`.
 
-Nesses casos, o endpoint generativo fica indisponível e o frontend usa o fallback local de PLN/ML.
+Nesses casos, o endpoint generativo fica indisponível e o frontend aplica o fallback local de PLN (`adaNlpChatbot.js`).
 
 Para reduzir custo quando a OpenAI estiver ligada:
 
@@ -317,19 +321,19 @@ npm.cmd run test:e2e
 O projeto utiliza um pipeline automatizado com GitHub Actions para o backend, localizado em `.github/workflows/ci-backend.yml`.
 
 **Principais etapas automatizadas:**
-- Instalação de dependências do backend
-- Execução de testes automatizados (placeholder, pode ser expandido)
-- Build do código backend
-- Versionamento semântico automático e criação de tags
-- Build e push de imagens Docker do backend para o Docker Hub
-- Deploy automático do backend no Render
+- Instalação de dependências e lint (ESLint)
+- Execução de testes unitários Jest (cobertura mínima de 80% nas use-cases)
+- Build do projeto NestJS
+- Versionamento semântico automático e criação de tags git
+- Build e push de imagem Docker para o Docker Hub (`ada-company-backend-mobile`)
+- Deploy automático na **Azure VM** via SSH: sobe os containers `postgres-db` e `api-backend` na rede `ada-net`
 - Notificações por e-mail em caso de falha
-- Uso de secrets para credenciais sensíveis
-- Cache de build para acelerar execuções
+- Uso de secrets para credenciais sensíveis (`AZURE_VM_HOST`, `AZURE_VM_USER`, `AZURE_VM_PRIVATE_KEY`)
+- Cache de camadas Docker para acelerar o build
 
 **Resumo do fluxo:**
-1. Build, teste, versionamento e publicação da imagem Docker do backend.
-2. Deploy automático do backend no Render ao criar uma nova versão.
+1. Build, lint, testes e publicação da imagem Docker.
+2. Deploy automático na Azure VM ao criar nova versão (containers reiniciados com `--restart always`).
 3. Notificações automáticas por e-mail em caso de falha em qualquer etapa.
 
 Para mais detalhes, consulte o arquivo de workflow `.github/workflows/ci-backend.yml` no repositório.
@@ -560,8 +564,32 @@ Content-Type: application/json
 
 ## 🌐 Links das Aplicações Publicadas
 
-- **Frontend:** [https://newadacompany.vercel.app/](https://newadacompany.vercel.app/)
-- **Backend:** [https://backend-adacompany.onrender.com/api](https://backend-adacompany.onrender.com/api)
+- **Frontend:** [http://apiadacompany.duckdns.org:8080](http://apiadacompany.duckdns.org:8080)
+- **Backend (API):** [http://apiadacompany.duckdns.org/api](http://apiadacompany.duckdns.org/api)
+- **Infraestrutura:** Azure VM — containers `api-backend` (porta 3001) e `postgres-db` na rede interna `ada-net`
+
+---
+
+## 📂 Documentação do Projeto (pasta `doctos/`)
+
+Os três tipos de documentação exigidos pelo PI-VI estão disponíveis na pasta [`doctos/`](./doctos/) na raiz deste repositório:
+
+| Arquivo | Descrição |
+|---|---|
+| `ADA_Company_Documentacao_Tecnica_PIVI.pdf` | Arquitetura, banco de dados, APIs, Azure, testes e PLN |
+| `ADA_Company_Documentacao_Desenvolvimento_PIVI.pdf` | Recursos humanos, tempo e custos investidos |
+| `ADA_Company_Documentacao_Usuario.docx.pdf` | Manual do usuário com passo a passo e FAQ |
+
+---
+
+## 🎤 Reconhecimento de Voz
+
+O sistema implementa reconhecimento de voz no frontend usando a **Web Speech API nativa do browser** (sem dependências externas), configurada para `pt-BR`. Disponível em dois pontos:
+
+- **Dashboard:** botão de microfone para ditar a URL do site a ser analisado pelo Lighthouse.
+- **ChatbotWidget:** entrada de voz para enviar mensagens à Ada.
+
+Requisito: contexto seguro (HTTPS ou localhost). Quando não suportado pelo browser, o sistema exibe mensagem de erro e mantém o campo de texto como alternativa.
 
 ---
 
